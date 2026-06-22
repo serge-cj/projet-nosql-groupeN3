@@ -1,0 +1,158 @@
+const { Server } = require('socket.io');
+const { createAdapter } = require('@socket.io/redis-adapter');
+const { logger } = require('../utils/logger');
+const { getRedisClient, isRedisConnected } = require('../config/redis');
+
+let io = null;
+
+/**
+ * Initialiser le serveur Socket.io
+ * @param {Object} httpServer - Serveur HTTP Express
+ * @returns {Object} - Instance Socket.io
+ */
+function initializeSocket(httpServer) {
+  io = new Server(httpServer, {
+    cors: {
+      origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+      methods: ['GET', 'POST'],
+      credentials: true,
+    },
+    pingTimeout: 60000,
+    pingInterval: 25000,
+  });
+
+  // Utiliser Redis adapter si disponible pour scaling horizontal
+  if (isRedisConnected()) {
+    const redisClient = getRedisClient();
+    const pubClient = redisClient.duplicate();
+    const subClient = redisClient.duplicate();
+
+    io.adapter(createAdapter(pubClient, subClient));
+    logger.info('Socket.io Redis adapter configuré');
+  }
+
+  // Middleware d'authentification Socket.io
+  io.use(async (socket, next) => {
+    try {
+      const token = socket.handshake.auth.token;
+      if (!token) {
+        return next(new Error('Token manquant'));
+      }
+
+      const { verifyToken } = require('../utils/token');
+      const decoded = verifyToken(token);
+      socket.userId = decoded.id;
+      socket.userRole = decoded.role;
+      next();
+    } catch (err) {
+      logger.error('Erreur authentification Socket.io', { message: err.message });
+      next(new Error('Authentification échouée'));
+    }
+  });
+
+  // Gestion des connexions
+  io.on('connection', (socket) => {
+    logger.info('Client Socket.io connecté', { socketId: socket.id, userId: socket.userId });
+
+    // Rejoindre la room de l'utilisateur
+    socket.join(`user:${socket.userId}`);
+
+    // Événement : rejoindre une room de commande
+    socket.on('join:order', (orderId) => {
+      socket.join(`order:${orderId}`);
+      logger.info('Client rejoint room commande', { socketId: socket.id, orderId });
+    });
+
+    // Événement : quitter une room de commande
+    socket.on('leave:order', (orderId) => {
+      socket.leave(`order:${orderId}`);
+      logger.info('Client quitte room commande', { socketId: socket.id, orderId });
+    });
+
+    // Événement : mise à jour de position GPS (livreur)
+    socket.on('location:update', (data) => {
+      const { orderId, lat, lng } = data;
+      logger.debug('Position GPS mise à jour', { socketId: socket.id, orderId, lat, lng });
+
+      // Émettre la position aux clients de la room commande
+      io.to(`order:${orderId}`).emit('location:updated', {
+        orderId,
+        lat,
+        lng,
+        timestamp: new Date(),
+      });
+    });
+
+    // Événement : mise à jour de statut de commande
+    socket.on('order:status:update', (data) => {
+      const { orderId, status } = data;
+      logger.debug('Statut commande mis à jour', { socketId: socket.id, orderId, status });
+
+      // Émettre le nouveau statut aux clients de la room commande
+      io.to(`order:${orderId}`).emit('order:status:updated', {
+        orderId,
+        status,
+        timestamp: new Date(),
+      });
+    });
+
+    // Déconnexion
+    socket.on('disconnect', () => {
+      logger.info('Client Socket.io déconnecté', { socketId: socket.id, userId: socket.userId });
+    });
+  });
+
+  logger.info('Socket.io initialisé');
+  return io;
+}
+
+/**
+ * Envoyer un événement à une room spécifique
+ * @param {string} room - Nom de la room
+ * @param {string} event - Nom de l'événement
+ * @param {Object} data - Données à envoyer
+ */
+function emitToRoom(room, event, data) {
+  if (!io) {
+    if (process.env.NODE_ENV !== 'test') {
+      logger.warn('Socket.io non initialisé');
+    }
+    return;
+  }
+
+  io.to(room).emit(event, data);
+  logger.debug('Événement envoyé à room', { room, event });
+}
+
+/**
+ * Envoyer un événement à un utilisateur spécifique
+ * @param {string} userId - ID de l'utilisateur
+ * @param {string} event - Nom de l'événement
+ * @param {Object} data - Données à envoyer
+ */
+function emitToUser(userId, event, data) {
+  if (!io) {
+    if (process.env.NODE_ENV !== 'test') {
+      logger.warn('Socket.io non initialisé');
+    }
+    return;
+  }
+
+  io.to(`user:${userId}`).emit(event, data);
+  logger.debug('Événement envoyé à utilisateur', { userId, event });
+}
+
+/**
+ * Obtenir l'instance Socket.io
+ * @returns {Object|null} - Instance Socket.io ou null
+ */
+function getIO() {
+  return io;
+}
+
+module.exports = {
+  initializeSocket,
+  emitToRoom,
+  emitToUser,
+  getIO,
+};
