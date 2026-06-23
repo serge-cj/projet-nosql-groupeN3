@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Libreville Eats — Backend API
 
 API REST pour **Libreville Eats**, application de livraison de repas à domicile à Libreville (projet NoSQL — Master I, Groupe 3).
