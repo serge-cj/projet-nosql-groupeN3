@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#002B16"/>
+      <stop offset="100%" stop-color="#004021"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <g transform="translate(80, 200)">
+    <rect x="0" y="0" width="64" height="64" rx="16" fill="#00A859"/>
+    <text x="32" y="42" font-family="Georgia, serif" font-size="32" font-weight="700" fill="#002B16" text-anchor="middle">LE</text>
+    <text x="88" y="42" font-family="Georgia, serif" font-size="48" font-weight="600" fill="#FFFFFF">Libreville Eats</text>
+    <text x="88" y="90" font-family="system-ui, sans-serif" font-size="24" fill="#00A859" font-weight="500">La bonne table de Libreville, livrée chez vous.</text>
+  </g>
+  <g transform="translate(80, 460)">
+    <text font-family="system-ui, sans-serif" font-size="18" fill="#6B6B6B">Restaurants locaux · Suivi en direct · Livraison dans toute la ville</text>
+  </g>
+</svg>

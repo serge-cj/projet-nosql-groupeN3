@@ -7,6 +7,65 @@ const { isValidTransition } = require('../utils/orderStateMachine');
 const cacheService = require('../services/cacheService');
 const { emitToRoom, emitToUser } = require('../socket');
 
+// Décrémente le stock des plats commandés ($inc) et bascule isAvailable à false
+// via $set lorsque le stock atteint zéro (gestion des ruptures par plat).
+// En cas d'échec sur un article (stock insuffisant), les décréments déjà
+// appliqués sont restaurés (compensation, faute de transaction multi-documents).
+async function decrementDishStock(restaurantId, items) {
+  const decremented = [];
+
+  for (const item of items) {
+    const updated = await Restaurant.findOneAndUpdate(
+      {
+        _id: restaurantId,
+        menus: {
+          $elemMatch: {
+            dishes: {
+              $elemMatch: {
+                _id: item.dishId,
+                isAvailable: true,
+                quantity: { $gte: item.quantity },
+              },
+            },
+          },
+        },
+      },
+      { $inc: { 'menus.$[].dishes.$[d].quantity': -item.quantity } },
+      { arrayFilters: [{ 'd._id': item.dishId }], new: true }
+    );
+
+    if (!updated) {
+      // Restaurer les décréments déjà effectués pour cette commande
+      for (const done of decremented) {
+        await Restaurant.updateOne(
+          { _id: restaurantId },
+          {
+            $inc: { 'menus.$[].dishes.$[d].quantity': done.quantity },
+            $set: { 'menus.$[].dishes.$[d].isAvailable': true },
+          },
+          { arrayFilters: [{ 'd._id': done.dishId }] }
+        );
+      }
+      throw AppError.badRequest(`Stock insuffisant ou plat indisponible : ${item.dishName}`, {
+        dishId: item.dishId,
+      });
+    }
+    decremented.push(item);
+
+    const dish = updated.menus
+      .flatMap((menu) => menu.dishes)
+      .find((d) => d._id.toString() === item.dishId);
+
+    if (dish && dish.quantity <= 0) {
+      await Restaurant.updateOne(
+        { _id: restaurantId },
+        { $set: { 'menus.$[].dishes.$[d].isAvailable': false } },
+        { arrayFilters: [{ 'd._id': item.dishId }] }
+      );
+    }
+  }
+}
+
 async function createOrder(req, res, next) {
   try {
     const { restaurantId, deliveryInfo, paymentMethod, items } = req.validated.body;
@@ -16,6 +75,8 @@ async function createOrder(req, res, next) {
     if (!restaurant) {
       return next(AppError.notFound('Restaurant introuvable', { restaurantId }));
     }
+
+    await decrementDishStock(restaurantId, items);
 
     const enrichedItems = items.map((item) => ({
       dishId: item.dishId,

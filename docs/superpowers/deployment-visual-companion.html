@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Libreville Eats Deployment Diagram</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #f5f7fb; color: #1f2937; margin:0; padding:40px; }
+    .canvas { display: grid; gap: 24px; max-width: 980px; margin: auto; }
+    .box { background: white; border: 1px solid #d1d5db; border-radius: 18px; padding: 24px; box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08); }
+    .title { margin: 0 0 12px; font-size: 1.05rem; font-weight: 700; }
+    .subtitle { margin:0; color:#4b5563; }
+    .flow { display:flex; align-items:center; gap:12px; justify-content:center; }
+    .arrow { font-size: 1.6rem; color:#6b7280; }
+    .note { color:#475569; margin-top:8px; font-size:0.95rem; }
+  </style>
+</head>
+<body>
+  <div class="canvas">
+    <div class="box">
+      <h1 class="title">Libreville Eats Deployment</h1>
+      <p class="subtitle">Current proposed target: Frontend on Netlify, Backend on Render, Database on MongoDB Atlas.</p>
+    </div>
+    <div class="flow">
+      <div class="box" style="flex:1; min-width:210px;">
+        <h2 class="title">Frontend</h2>
+        <p class="subtitle">Next.js app hosted on Netlify</p>
+        <p class="note">Build output served as static / serverless pages. Makes API calls to backend.</p>
+      </div>
+      <div class="arrow">→</div>
+      <div class="box" style="flex:1; min-width:210px;">
+        <h2 class="title">Backend</h2>
+        <p class="subtitle">Node.js / Express API hosted on Render</p>
+        <p class="note">Receives requests from frontend, validates, authenticates, accesses MongoDB, publishes/retrieves real-time socket events.</p>
+      </div>
+      <div class="arrow">→</div>
+      <div class="box" style="flex:1; min-width:210px;">
+        <h2 class="title">Database</h2>
+        <p class="subtitle">MongoDB Atlas cluster</p>
+        <p class="note">Stores users, restaurants, commandes, livreurs. Backend uses Mongoose + connection string from environment.</p>
+      </div>
+    </div>
+    <div class="box">
+      <h2 class="title">Additional deployment considerations</h2>
+      <ul>
+        <li>Environment variables: API URL, MongoDB URI, JWT_SECRET, Redis host/port if used.</li>
+        <li>Backend static asset or CORS config to allow frontend origin.</li>
+        <li>Production start script: `npm start` for backend, `next build && next start` or Netlify build command for frontend.</li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>

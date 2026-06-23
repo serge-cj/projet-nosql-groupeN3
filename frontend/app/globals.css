@@ -1,0 +1,187 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import '../tokens.css';
+@import '@fontsource-variable/geist';
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root {
+  color-scheme: light;
+  font-family: var(--font-body);
+  background-color: var(--color-canvas);
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: clip;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: clip;
+  background-color: var(--color-canvas);
+  color: var(--color-text-primary);
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+  pointer-events: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+::selection {
+  background: color-mix(in oklch, var(--color-accent) 22%, transparent);
+  color: var(--color-accent-ink);
+}
+
+:focus-visible {
+  outline: 2px solid color-mix(in oklch, var(--color-focus) 70%, transparent);
+  outline-offset: 3px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  text-wrap: balance;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--color-accent) 40%, transparent); }
+  70% { box-shadow: 0 0 0 8px color-mix(in oklch, var(--color-accent) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--color-accent) 0%, transparent); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spotlight {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@layer components {
+  .font-display {
+    font-family: var(--font-display);
+    font-style: normal;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center whitespace-nowrap rounded-pill bg-brand px-5 py-3 text-sm font-extrabold text-brand-ink;
+    transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-short) var(--ease-out);
+  }
+
+  .btn-primary:hover {
+    @apply bg-brand-pressed;
+  }
+
+  .btn-primary:active {
+    transform: scale(0.98);
+  }
+
+  .btn-primary:disabled {
+    @apply cursor-not-allowed opacity-70;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center whitespace-nowrap rounded-pill border border-divider bg-canvas px-5 py-3 text-sm font-semibold text-ink;
+    transition: border-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out);
+  }
+
+  .btn-secondary:hover {
+    @apply border-brand text-brand;
+  }
+
+  .input-field {
+    @apply w-full rounded-input border border-divider bg-canvas px-4 py-3 text-ink outline-none;
+    transition: border-color var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out);
+  }
+
+  .input-field:focus {
+    @apply border-brand ring-2;
+    --tw-ring-color: color-mix(in oklch, var(--color-accent) 20%, transparent);
+  }
+
+  .surface-card {
+    @apply rounded-card border border-divider bg-canvas;
+    box-shadow: var(--shadow-card);
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-pulse-ring {
+    animation: pulse-ring 2s ease-in-out infinite;
+  }
+
+  .animate-fade-in-up {
+    animation: fade-in-up 0.5s var(--ease-out) both;
+  }
+
+  .card-spotlight {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .card-spotlight::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    z-index: -1;
+    border-radius: inherit;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in oklch, var(--color-accent) 60%, transparent) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    opacity: 0;
+    transition: opacity var(--dur-medium) var(--ease-out);
+  }
+
+  .card-spotlight:hover::before {
+    opacity: 1;
+    animation: spotlight 1.5s linear infinite;
+  }
+}
