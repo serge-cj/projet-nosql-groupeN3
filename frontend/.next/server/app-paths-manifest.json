@@ -1,0 +1,21 @@
+{
+  "/auth/login/page": "app/auth/login/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/auth/pro/page": "app/auth/pro/page.js",
+  "/admin/page": "app/admin/page.js",
+  "/auth/register/page": "app/auth/register/page.js",
+  "/auth/register/vendor/page": "app/auth/register/vendor/page.js",
+  "/cart/page": "app/cart/page.js",
+  "/auth/register/deliverer/page": "app/auth/register/deliverer/page.js",
+  "/deliverer/dashboard/page": "app/deliverer/dashboard/page.js",
+  "/orders/[id]/page": "app/orders/[id]/page.js",
+  "/page": "app/page.js",
+  "/privacy/page": "app/privacy/page.js",
+  "/profile/page": "app/profile/page.js",
+  "/restaurant/dashboard/page": "app/restaurant/dashboard/page.js",
+  "/restaurants/[id]/page": "app/restaurants/[id]/page.js",
+  "/restaurants/page": "app/restaurants/page.js",
+  "/settings/page": "app/settings/page.js",
+  "/terms/page": "app/terms/page.js",
+  "/orders/page": "app/orders/page.js"
+}
