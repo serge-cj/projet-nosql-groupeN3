@@ -21,6 +21,8 @@ const restaurantSchema = new mongoose.Schema(
       match: [/^\+241\d{8}$/, 'Format attendu : +241XXXXXXXX'],
     },
 
+    image: String,
+
     address: {
       street: {
         type: String,

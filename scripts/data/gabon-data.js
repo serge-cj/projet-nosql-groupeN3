@@ -20,6 +20,7 @@ const GABON_DISHES = [
     category: 'Plats Principaux',
     price: 3500,
     preparationTime: 20,
+    image: 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=800&q=80',
   },
   {
     name: 'Attiéké',
@@ -27,6 +28,7 @@ const GABON_DISHES = [
     category: 'Accompagnements',
     price: 1500,
     preparationTime: 5,
+    image: 'https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=800&q=80',
   },
   {
     name: 'Libuma Okondé',
@@ -34,6 +36,7 @@ const GABON_DISHES = [
     category: 'Plats Principaux',
     price: 4200,
     preparationTime: 25,
+    image: 'https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=800&q=80',
   },
   {
     name: 'Bâton de Manioc',
@@ -41,6 +44,7 @@ const GABON_DISHES = [
     category: 'Accompagnements',
     price: 1200,
     preparationTime: 8,
+    image: 'https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=800&q=80',
   },
   {
     name: 'Viande Grillée',
@@ -48,6 +52,7 @@ const GABON_DISHES = [
     category: 'Plats Principaux',
     price: 3800,
     preparationTime: 22,
+    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80',
   },
   {
     name: 'Banane Plantain Frite',
@@ -62,6 +67,7 @@ const GABON_DISHES = [
     category: 'Plats Principaux',
     price: 3200,
     preparationTime: 18,
+    image: 'https://images.unsplash.com/photo-1559847844-5315695dadae?w=800&q=80',
   },
   {
     name: 'Riz à la Sauce Tomate',
@@ -69,6 +75,7 @@ const GABON_DISHES = [
     category: 'Accompagnements',
     price: 1300,
     preparationTime: 12,
+    image: 'https://images.unsplash.com/photo-1574484284002-952d92456975?w=800&q=80',
   },
   {
     name: 'Piment Aioli',
@@ -83,6 +90,7 @@ const GABON_DISHES = [
     category: 'Boissons',
     price: 1500,
     preparationTime: 1,
+    image: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=800&q=80',
   },
   {
     name: 'Bissap',
@@ -90,6 +98,7 @@ const GABON_DISHES = [
     category: 'Boissons',
     price: 1200,
     preparationTime: 1,
+    image: 'https://images.unsplash.com/photo-1497534446932-c925b458314e?w=800&q=80',
   },
   {
     name: 'Flan Gabon',
@@ -97,6 +106,7 @@ const GABON_DISHES = [
     category: 'Desserts',
     price: 2000,
     preparationTime: 5,
+    image: 'https://images.unsplash.com/photo-1437418747212-8d9709afab22?w=800&q=80',
   },
 ];
 
@@ -124,6 +134,13 @@ const RESTAURANT_NAMES = [
   'Taste of Gabon',
   'Resto Nyembwe',
   'La Maison du Poulet',
+];
+
+// Cover photos for restaurant cards/headers (cycled by index)
+const RESTAURANT_IMAGES = [
+  'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=1200&q=80',
+  'https://images.unsplash.com/photo-1543007631-283050bb3e8c?w=1200&q=80',
+  'https://images.unsplash.com/photo-1481833761820-0509d3217039?w=1200&q=80',
 ];
 
 // Delivery zones with fees (in FCFA)
@@ -218,6 +235,7 @@ module.exports = {
   GABON_DISHES,
   PHONE_GENERATORS,
   RESTAURANT_NAMES,
+  RESTAURANT_IMAGES,
   DELIVERY_ZONES,
   OPERATING_HOURS,
   DISTRICT_COORDINATES,

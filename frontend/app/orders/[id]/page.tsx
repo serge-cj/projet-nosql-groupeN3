@@ -311,7 +311,11 @@ export default function OrderDetailPage({ params }: OrderProps) {
                   <p className="mt-2 text-sm text-ink-muted">Créée le {formatDate(order.createdAt ?? order.metadata?.createdAt)}</p>
                 </div>
                 <div className="flex flex-col items-start gap-2 md:items-end">
-                  <div className="rounded-pill bg-brand px-4 py-2 text-sm font-semibold text-brand-ink">
+                  <div
+                    className={`rounded-pill px-4 py-2 text-sm font-semibold ${
+                      order.status === 'DELIVERED' ? 'bg-forest-100 text-forest-900' : 'bg-mango-500 text-mango-900'
+                    }`}
+                  >
                     {STATUS_LABELS[order.status]}
                   </div>
                   <p className="text-xs font-semibold text-ink-muted">
@@ -329,7 +333,11 @@ export default function OrderDetailPage({ params }: OrderProps) {
                     <div key={step.status} className="flex items-start gap-4">
                       <div
                         className={`mt-1 flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
-                          isCompleted || isCurrent ? 'bg-brand text-brand-ink' : 'bg-canvas text-ink-muted ring-1 ring-divider'
+                          isCompleted
+                            ? 'bg-forest-500 text-forest-900'
+                            : isCurrent
+                              ? 'bg-mango-500 text-mango-900 animate-pulse-ring'
+                              : 'bg-canvas text-ink-muted/40 ring-1 ring-divider'
                         }`}
                       >
                         {index + 1}

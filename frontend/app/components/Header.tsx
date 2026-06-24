@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { IconCart, IconSearch } from './icons';
+import { IconCart, IconMoon, IconSearch, IconSun } from './icons';
 
 interface User {
   _id: string;
@@ -23,6 +23,18 @@ export default function Header() {
   const [cartCount, setCartCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    setDarkMode(document.documentElement.classList.contains('dark'));
+  }, []);
+
+  function toggleDarkMode() {
+    const next = !darkMode;
+    setDarkMode(next);
+    document.documentElement.classList.toggle('dark', next);
+    localStorage.setItem('darkMode', String(next));
+  }
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
@@ -122,6 +134,15 @@ export default function Header() {
         </form>
 
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
+          <button
+            type="button"
+            onClick={toggleDarkMode}
+            aria-label={darkMode ? 'Activer le mode clair' : 'Activer le mode sombre'}
+            className="inline-flex items-center rounded-pill p-3 text-ink-muted transition-colors hover:bg-surface-1 hover:text-brand"
+          >
+            {darkMode ? <IconSun className="h-5 w-5" /> : <IconMoon className="h-5 w-5" />}
+          </button>
+
           <Link
             href="/restaurants"
             className="inline-flex items-center rounded-pill p-3 text-ink-muted transition-colors hover:bg-surface-1 hover:text-brand md:hidden"

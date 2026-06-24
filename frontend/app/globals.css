@@ -4,7 +4,6 @@
 
 @import '../tokens.css';
 @import '@fontsource-variable/geist';
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 :root {
   color-scheme: light;
@@ -85,6 +84,10 @@ h1, h2, h3, h4, h5, h6 {
   100% { background-position: -200% 0; }
 }
 
+@keyframes draw-underline {
+  to { stroke-dashoffset: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -156,6 +159,12 @@ h1, h2, h3, h4, h5, h6 {
 
   .animate-fade-in-up {
     animation: fade-in-up 0.5s var(--ease-out) both;
+  }
+
+  .animate-draw-underline {
+    stroke-dasharray: 340;
+    stroke-dashoffset: 340;
+    animation: draw-underline 0.9s var(--ease-in-out) both;
   }
 
   .card-spotlight {

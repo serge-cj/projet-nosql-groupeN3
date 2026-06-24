@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import api from '@/lib/api';
 import CartDrawer from '@/app/components/CartDrawer';
-import { IconCart } from '@/app/components/icons';
+import { IconCart, IconCheck } from '@/app/components/icons';
 import { loadCart, saveCart, addToCart as cartHelperAddToCart, getCartTotal } from '@/lib/cartHelper';
 
 interface Props {
@@ -70,6 +70,10 @@ export default function RestaurantDetailClient({ params }: Props) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [addedItemMessage, setAddedItemMessage] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerOpenedOnce, setDrawerOpenedOnce] = useState(false);
+  const [justAddedDishId, setJustAddedDishId] = useState<string | null>(null);
+  const [cartPulse, setCartPulse] = useState(false);
+  const [pendingDish, setPendingDish] = useState<Dish | null>(null);
 
   useEffect(() => {
     setCartItems(loadCart());
@@ -128,6 +132,28 @@ export default function RestaurantDetailClient({ params }: Props) {
   const slugifyCategory = (category: string) =>
     category.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
+  function commitAddToCart(dish: Dish, baseCart: CartItem[]) {
+    if (!restaurant || !dish._id) return;
+
+    const updatedCart = cartHelperAddToCart(dish, restaurant, baseCart);
+    setCartItems(updatedCart);
+    saveCart(updatedCart);
+    setAddedItemMessage(`${dish.name} ajouté au panier`);
+    window.setTimeout(() => setAddedItemMessage(''), 2200);
+
+    const dishId = dish._id;
+    setJustAddedDishId(dishId);
+    window.setTimeout(() => setJustAddedDishId((current) => (current === dishId ? null : current)), 1400);
+
+    if (!drawerOpenedOnce) {
+      setDrawerOpen(true);
+      setDrawerOpenedOnce(true);
+    } else {
+      setCartPulse(true);
+      window.setTimeout(() => setCartPulse(false), 600);
+    }
+  }
+
   function handleAddToCart(dish: Dish) {
     if (!restaurant || !dish._id) {
       setAddedItemMessage('Impossible d\'ajouter ce plat au panier.');
@@ -137,19 +163,21 @@ export default function RestaurantDetailClient({ params }: Props) {
 
     const hasItemsFromAnotherRestaurant = cartItems.some((item) => item.restaurantId !== restaurant._id);
     if (hasItemsFromAnotherRestaurant) {
-      const shouldReplaceCart = window.confirm(
-        'Votre panier contient déjà des plats d\'un autre restaurant. Remplacer le panier ?'
-      );
-      if (!shouldReplaceCart) return;
+      setPendingDish(dish);
+      return;
     }
 
-    const baseCart = hasItemsFromAnotherRestaurant ? [] : cartItems;
-    const updatedCart = cartHelperAddToCart(dish, restaurant, baseCart);
-    setCartItems(updatedCart);
-    saveCart(updatedCart);
-    setAddedItemMessage(`${dish.name} ajouté au panier`);
-    setDrawerOpen(true);
-    window.setTimeout(() => setAddedItemMessage(''), 2200);
+    commitAddToCart(dish, cartItems);
+  }
+
+  function handleConfirmReplaceCart() {
+    if (!pendingDish) return;
+    commitAddToCart(pendingDish, []);
+    setPendingDish(null);
+  }
+
+  function handleCancelReplaceCart() {
+    setPendingDish(null);
   }
 
   return (
@@ -167,7 +195,7 @@ export default function RestaurantDetailClient({ params }: Props) {
                   <div className="flex flex-wrap items-center gap-2 text-sm">
                     <span
                       className={`rounded-pill px-3 py-1 text-xs font-semibold ${
-                        restaurant.isOpen ? 'bg-brand text-brand-ink' : 'bg-surface-1 text-ink'
+                        restaurant.isOpen ? 'bg-forest-100 text-forest-900' : 'bg-surface-1 text-ink'
                       }`}
                     >
                       {restaurant.isOpen ? 'Ouvert' : 'Fermé'}
@@ -203,7 +231,11 @@ export default function RestaurantDetailClient({ params }: Props) {
                   </div>
                 </div>
                 <div className="pointer-events-none hidden lg:block">
-                  <div className="sticky top-24 rounded-card border border-divider bg-surface-1 p-4 text-sm text-ink-muted shadow-soft">
+                  <div
+                    className={`sticky top-24 rounded-card border border-divider bg-surface-1 p-4 text-sm text-ink-muted shadow-soft transition-transform duration-300 ${
+                      cartPulse ? 'scale-105 border-brand' : ''
+                    }`}
+                  >
                     <div className="flex items-center gap-3">
                       <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand/10 text-brand">
                         <IconCart className="h-5 w-5" />
@@ -240,7 +272,11 @@ export default function RestaurantDetailClient({ params }: Props) {
                     </dl>
                   </div>
 
-                  <div className="rounded-card border border-divider bg-surface-1 p-6 shadow-soft">
+                  <div
+                    className={`rounded-card border border-divider bg-surface-1 p-6 shadow-soft transition-transform duration-300 ${
+                      cartPulse ? 'scale-105 border-brand' : ''
+                    }`}
+                  >
                     <div className="flex items-center justify-between gap-4">
                       <div>
                         <p className="text-sm text-ink-muted">Panier</p>
@@ -324,7 +360,7 @@ export default function RestaurantDetailClient({ params }: Props) {
                               ) : null}
                               <h3 className="text-lg font-semibold text-ink">{dish.name}</h3>
                               {dish.description ? (
-                                <p className="text-sm leading-6 text-ink-muted">{dish.description}</p>
+                                <p className="text-base leading-6 text-ink-muted">{dish.description}</p>
                               ) : null}
                               {dish.preparationTime ? (
                                 <p className="text-xs tabular-nums text-ink-muted">
@@ -342,9 +378,20 @@ export default function RestaurantDetailClient({ params }: Props) {
                                 type="button"
                                 onClick={() => handleAddToCart(dish)}
                                 disabled={!dish.isAvailable}
-                                className="btn-primary px-5 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                                className={`btn-primary inline-flex items-center gap-2 px-5 py-2.5 text-sm transition-transform duration-150 disabled:cursor-not-allowed disabled:opacity-50 ${
+                                  justAddedDishId === dish._id ? 'scale-105' : ''
+                                }`}
                               >
-                                {dish.isAvailable === false ? 'Indisponible' : 'Ajouter'}
+                                {dish.isAvailable === false ? (
+                                  'Indisponible'
+                                ) : justAddedDishId === dish._id ? (
+                                  <>
+                                    <IconCheck className="h-4 w-4" />
+                                    Ajouté
+                                  </>
+                                ) : (
+                                  'Ajouter'
+                                )}
                               </button>
                             </div>
                           </li>
@@ -385,7 +432,11 @@ export default function RestaurantDetailClient({ params }: Props) {
         </div>
       </section>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-between gap-3 border-t border-divider bg-canvas/95 px-4 py-3 shadow-soft backdrop-blur-sm lg:hidden">
+      <div
+        className={`fixed inset-x-0 bottom-0 z-40 flex items-center justify-between gap-3 border-t border-divider bg-canvas/95 px-4 py-3 shadow-soft backdrop-blur-sm transition-transform duration-300 lg:hidden ${
+          cartPulse ? 'scale-105' : ''
+        }`}
+      >
         <div>
           <p className="text-sm font-semibold text-ink">{totalCartItems} article{totalCartItems !== 1 ? 's' : ''}</p>
           <p className="text-sm tabular-nums text-ink-muted">{currentCartTotal.toLocaleString()} FCFA</p>
@@ -418,6 +469,25 @@ export default function RestaurantDetailClient({ params }: Props) {
           saveCart(filtered);
         }}
       />
+
+      {pendingDish ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-6" role="alertdialog" aria-modal="true">
+          <div className="w-full max-w-sm rounded-card border border-divider bg-canvas p-6 shadow-2xl">
+            <h2 className="text-lg font-semibold text-ink">Remplacer le panier ?</h2>
+            <p className="mt-2 text-sm text-ink-muted">
+              Votre panier contient déjà des plats d&apos;un autre restaurant. Ajouter « {pendingDish.name} » videra votre panier actuel.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button type="button" onClick={handleCancelReplaceCart} className="btn-secondary px-4 py-2.5 text-sm">
+                Annuler
+              </button>
+              <button type="button" onClick={handleConfirmReplaceCart} className="btn-primary px-4 py-2.5 text-sm">
+                Remplacer
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }
