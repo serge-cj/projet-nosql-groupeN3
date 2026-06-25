@@ -5,7 +5,8 @@ module.exports = {
   mongodb: {
     local: process.env.MONGODB_LOCAL_URI || 'mongodb://localhost:27017/libreville_eats',
     atlas: process.env.MONGODB_ATLAS_URI || '',
-    uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/libreville_eats',
+    uri:
+      process.env.MONGODB_URI || process.env.MONGO_URI || process.env.MONGODB_ATLAS_URI || 'mongodb://localhost:27017/libreville_eats',
   },
 
   // Redis
