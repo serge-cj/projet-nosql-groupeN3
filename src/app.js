@@ -18,7 +18,22 @@ const allowedOrigins = config.frontend.urls;
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      // Allow requests with no origin (e.g., curl, server-side)
+      if (!origin) return callback(null, true);
+
+      // In development accept any localhost:PORT origin to avoid flaky dev-port shifts
+      if (config.server.nodeEnv === 'development') {
+        try {
+          const parsed = new URL(origin);
+          if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
+            return callback(null, true);
+          }
+        } catch (err) {
+          // fall through to allowedOrigins check
+        }
+      }
+
+      if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 

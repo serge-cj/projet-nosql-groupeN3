@@ -37,14 +37,18 @@ export default function Header() {
   }
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch {
-        localStorage.removeItem('user');
+    const syncUser = () => {
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        try {
+          setUser(JSON.parse(savedUser));
+          return;
+        } catch {
+          localStorage.removeItem('user');
+        }
       }
-    }
+      setUser(null);
+    };
 
     const syncCart = () => {
       const savedCart = localStorage.getItem('cart');
@@ -60,10 +64,21 @@ export default function Header() {
       }
     };
 
+    syncUser();
     syncCart();
-    window.addEventListener('storage', syncCart);
-    return () => window.removeEventListener('storage', syncCart);
-  }, []);
+
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === 'user' || event.key === 'token') {
+        syncUser();
+      }
+      if (event.key === 'cart') {
+        syncCart();
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, [pathname]);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
