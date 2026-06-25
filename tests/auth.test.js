@@ -50,6 +50,8 @@ describe('API Authentification', () => {
   });
 
   test('POST /api/auth/login doit authentifier et retourner un jeton', async () => {
+    await request(app).post('/api/auth/register').send(testUser);
+
     const response = await request(app)
       .post('/api/auth/login')
       .send({ email: testUser.email, password: testUser.password });
