@@ -13,6 +13,7 @@ const {
   GABON_DISHES,
   PHONE_GENERATORS,
   RESTAURANT_NAMES,
+  RESTAURANT_IMAGES,
   DELIVERY_ZONES,
   OPERATING_HOURS,
   DISTRICT_COORDINATES,
@@ -149,6 +150,7 @@ async function seedRestaurants(vendors) {
       name: randomChoice(RESTAURANT_NAMES),
       email: `restaurant${i + 1}@librevilleeats.ga`,
       phone: PHONE_GENERATORS.generatePhone(),
+      image: RESTAURANT_IMAGES[i % RESTAURANT_IMAGES.length],
       address: {
         street: `Rue ${randomChoice(['Principale', 'Commerciale', 'des Cuisines'])}`,
         district,

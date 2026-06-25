@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import PageToolbar from '../components/PageToolbar';
-import { IconSearch } from '../components/icons';
+import { IconSearch, IconClock, IconPlus, IconCheck, IconMapPin } from '../components/icons';
 import { RestaurantCardSkeleton } from '../components/Skeleton';
 import StarRating from '../components/StarRating';
 
@@ -47,8 +47,11 @@ export default function RestaurantsPageClient() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPaginating, setIsPaginating] = useState(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [selectedCuisine, setSelectedCuisine] = useState<string | null>(null);
   const [selectedNeighborhood, setSelectedNeighborhood] = useState<string | null>(null);
@@ -61,25 +64,37 @@ export default function RestaurantsPageClient() {
     if (initialized) return;
     const q = searchParams.get('q');
     const district = searchParams.get('district');
-    if (q) setSearch(q);
+    if (q) {
+      setSearch(q);
+      setDebouncedSearch(q);
+    }
     if (district) setSelectedDistrict(district);
     setInitialized(true);
   }, [searchParams, initialized]);
 
   useEffect(() => {
+    const timeout = window.setTimeout(() => setDebouncedSearch(search), 300);
+    return () => window.clearTimeout(timeout);
+  }, [search]);
+
+  useEffect(() => {
     if (!initialized) return;
 
     const controller = new AbortController();
+    if (hasLoadedOnce) {
+      setIsPaginating(true);
+    } else {
+      setIsLoading(true);
+    }
 
     async function fetchRestaurants() {
-      setIsLoading(true);
       setError('');
       try {
         const params = new URLSearchParams({
           page: String(currentPage),
           limit: String(PAGE_LIMIT),
         });
-        const query = search.trim();
+        const query = debouncedSearch.trim();
 
         if (query) params.set('q', query);
         if (selectedDistrict) params.set('district', selectedDistrict);
@@ -103,6 +118,8 @@ export default function RestaurantsPageClient() {
       } finally {
         if (!controller.signal.aborted) {
           setIsLoading(false);
+          setIsPaginating(false);
+          setHasLoadedOnce(true);
         }
       }
     }
@@ -110,7 +127,7 @@ export default function RestaurantsPageClient() {
     fetchRestaurants();
 
     return () => controller.abort();
-  }, [search, selectedDistrict, isOpen, selectedBadge, currentPage, initialized]);
+  }, [debouncedSearch, selectedDistrict, isOpen, selectedBadge, currentPage, initialized]);
 
   function resetFilters() {
     setSearch('');
@@ -180,89 +197,100 @@ export default function RestaurantsPageClient() {
           </div>
 
           <div className="space-y-6">
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_auto]">
+            <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
               <div className="rounded-card border border-divider bg-surface-1 p-5 shadow-soft">
-                <p className="text-sm text-ink-muted">Parcours produit</p>
+                <p className="text-sm text-ink-muted">Je veux</p>
+                <h3 className="mt-3 text-lg font-semibold text-ink">Trouver vite</h3>
+                <p className="mt-2 text-sm text-ink-muted">Choisis un parcours pour filtrer rapidement les options.</p>
+
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {[
-                    { id: 'OPEN', label: 'Ouvert maintenant' },
-                    { id: 'PROMO', label: 'Promos' },
-                    { id: 'TOP', label: 'Top notés' },
-                    { id: 'FAST', label: 'Livraison rapide' },
+                    { id: 'OPEN', label: 'Ouvert maintenant', icon: IconClock },
+                    { id: 'PROMO', label: 'Promos', icon: IconPlus },
+                    { id: 'TOP', label: 'Top notés', icon: IconCheck },
+                    { id: 'FAST', label: 'Livraison rapide', icon: IconMapPin },
                   ].map((badge) => (
                     <button
                       key={badge.id}
                       type="button"
                       onClick={() => selectBadge(badge.id as 'OPEN' | 'PROMO' | 'TOP' | 'FAST' | '')}
-                      className={`rounded-pill border px-4 py-3 text-sm font-semibold transition duration-200 ${
+                      className={`w-full sm:w-auto rounded-pill border px-4 py-3 text-sm font-semibold transition duration-200 flex items-center gap-3 justify-center ${
                         selectedBadge === badge.id
                           ? 'border-brand bg-brand/10 text-brand'
                           : 'border-divider bg-surface-1 text-ink hover:border-brand hover:bg-brand/5 hover:text-brand'
                       }`}
                     >
-                      {badge.label}
+                      {badge.icon ? (
+                        <span className="flex items-center gap-2">
+                          <badge.icon className="h-4 w-4 text-current" />
+                          <span>{badge.label}</span>
+                        </span>
+                      ) : (
+                        badge.label
+                      )}
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="grid gap-3 rounded-card border border-divider bg-surface-1 p-5 shadow-soft">
-                <div>
-                  <p className="text-sm text-ink-muted">Piliers de cuisine</p>
-                  <div className="mt-3 flex flex-wrap gap-3">
-                    {CUISINES.map((cuisine) => (
-                      <button
-                        key={cuisine}
-                        type="button"
-                        onClick={() => selectCuisine(cuisine)}
-                        className={`rounded-pill border px-4 py-3 text-sm font-semibold transition duration-200 ${
-                          selectedCuisine === cuisine
-                            ? 'border-brand bg-brand/10 text-brand'
-                            : 'border-divider bg-surface-1 text-ink hover:border-brand hover:bg-brand/5 hover:text-brand'
-                        }`}
-                      >
-                        {cuisine}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-sm text-ink-muted">Quartiers</p>
+              <div className="grid gap-3">
+                <div className="rounded-card border border-divider bg-surface-1 p-5 shadow-soft">
+                  <p className="text-sm text-ink-muted">Quartiers chauds</p>
                   <div className="mt-3 flex flex-wrap gap-3">
                     {NEIGHBORHOODS.map((neighborhood) => (
                       <button
                         key={neighborhood}
                         type="button"
                         onClick={() => selectNeighborhood(neighborhood)}
-                        className={`rounded-pill border px-4 py-3 text-sm font-semibold transition duration-200 ${
+                        className={`w-full sm:w-auto rounded-pill border px-4 py-3 text-sm font-semibold transition duration-200 flex items-center gap-2 justify-center ${
                           selectedNeighborhood === neighborhood
                             ? 'border-brand bg-brand/10 text-brand'
                             : 'border-divider bg-surface-1 text-ink hover:border-brand hover:bg-brand/5 hover:text-brand'
                         }`}
                       >
-                        {neighborhood}
+                        <IconMapPin className="h-4 w-4 text-current" />
+                        <span>{neighborhood}</span>
                       </button>
                     ))}
+                  </div>
+                </div>
+
+                <div className="rounded-card border border-divider bg-surface-1 p-5 shadow-soft">
+                  <p className="text-sm text-ink-muted">Offres du jour</p>
+                  <div className="mt-3">
+                    <p className="text-lg font-semibold text-ink">4 promos actives</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_auto]">
-              <div className="relative">
+            <div className="mt-4 grid gap-3 sm:grid-cols-3 lg:grid-cols-[minmax(0,1fr)_auto]">
+              <div className="relative sm:col-span-2">
                 <IconSearch className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-brand" />
                 <input
                   type="search"
                   value={search}
                   onChange={(event) => updateSearch(event.target.value)}
                   placeholder="Chercher un restaurant, une cuisine ou un plat…"
-                  className="input-field border-2 border-brand py-3.5 pl-12 pr-4"
+                  className="input-field border-2 border-brand py-3.5 pl-12 pr-4 w-full"
                 />
               </div>
 
-              <button type="button" onClick={resetFilters} className="btn-secondary whitespace-nowrap px-4 py-3 text-sm">
-                Réinitialiser
-              </button>
+              <div className="flex items-center gap-3">
+                <button type="button" onClick={resetFilters} className="btn-secondary w-full sm:w-auto whitespace-nowrap px-4 py-3 text-sm">
+                  Réinitialiser
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCurrentPage(1);
+                    setDebouncedSearch(search);
+                  }}
+                  className="btn-primary w-full sm:w-auto px-4 py-3 text-sm"
+                >
+                  Explorer
+                </button>
+              </div>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3">
@@ -334,9 +362,9 @@ export default function RestaurantsPageClient() {
                         )}
 
                         <div className="absolute inset-x-0 top-0 flex justify-between p-4">
-                          <span className="rounded-pill bg-brand/10 px-3 py-1 text-xs font-semibold text-brand-ink">{restaurant.isOpen === 'true' || restaurant.isOpen ? 'Ouvert' : 'Fermé'}</span>
+                          <span className="rounded-pill bg-forest-100 px-3 py-1 text-xs font-semibold text-forest-900">{restaurant.isOpen === 'true' || restaurant.isOpen ? 'Ouvert' : 'Fermé'}</span>
                           {(restaurant.isPlus || restaurant.promo) && (
-                            <span className={`rounded-pill px-3 py-1 text-xs font-semibold ${restaurant.isPlus ? 'bg-brand text-brand-ink' : 'bg-promo text-brand-ink'}`}>
+                            <span className={`rounded-pill px-3 py-1 text-xs font-semibold ${restaurant.isPlus ? 'bg-mango-500 text-mango-900' : 'bg-promo text-mango-900'}`}>
                               {restaurant.isPlus ? 'TOP' : 'PROMO'}
                             </span>
                           )}
@@ -355,7 +383,7 @@ export default function RestaurantsPageClient() {
 
                         <div className="grid gap-2 text-sm text-ink-muted">
                           <div className="flex items-center justify-between gap-2 rounded-pill border border-divider bg-surface-1 px-3 py-2">
-                            <span className="font-semibold text-ink">{restaurant.rating ? restaurant.rating.toFixed(1) : '—'}</span>
+                            <span className="font-mono font-semibold text-mango-700">{restaurant.rating ? restaurant.rating.toFixed(1) : '—'}</span>
                             {restaurant.rating ? <StarRating rating={restaurant.rating} size={14} /> : <span>☆☆☆☆☆</span>}
                           </div>
                           <div className="flex items-center justify-between gap-2 rounded-pill border border-divider bg-surface-1 px-3 py-2">
@@ -379,18 +407,18 @@ export default function RestaurantsPageClient() {
                     <button
                       type="button"
                       onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))}
-                      disabled={!pagination.hasPrev}
+                      disabled={!pagination.hasPrev || isPaginating}
                       className="btn-secondary px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      Précédent
+                      {isPaginating ? '…' : 'Précédent'}
                     </button>
                     <button
                       type="button"
                       onClick={() => setCurrentPage((page) => page + 1)}
-                      disabled={!pagination.hasNext}
+                      disabled={!pagination.hasNext || isPaginating}
                       className="btn-primary px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      Suivant
+                      {isPaginating ? '…' : 'Suivant'}
                     </button>
                   </div>
                 </div>

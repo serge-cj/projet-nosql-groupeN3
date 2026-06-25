@@ -128,9 +128,9 @@ export default function OrdersPage() {
                     </div>
                     <div className="shrink-0 text-right">
                       <span className={`inline-block rounded-pill px-3 py-1 text-xs font-semibold ${
-                        order.status === 'DELIVERED' ? 'bg-brand/15 text-brand' :
+                        order.status === 'DELIVERED' ? 'bg-forest-100 text-forest-900' :
                         order.status === 'CANCELLED' || order.status === 'FAILED' ? 'bg-error/15 text-error' :
-                        'bg-brand/10 text-brand'
+                        'bg-mango-100 text-mango-700'
                       }`}>
                         {STATUS_LABELS[order.status]}
                       </span>

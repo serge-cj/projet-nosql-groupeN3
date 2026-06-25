@@ -52,11 +52,11 @@ const STATUS_FLOW: Record<string, string> = {
 
 const STATUS_TRANSITIONS: Record<string, { label: string; color: string; actionLabel: string }> = {
   PENDING: { label: 'En attente', color: 'error', actionLabel: 'Confirmer' },
-  CONFIRMED: { label: 'Confirmée', color: 'warning', actionLabel: 'Préparer' },
+  CONFIRMED: { label: 'Confirmée', color: 'brand', actionLabel: 'Préparer' },
   PREPARING: { label: 'En préparation', color: 'brand', actionLabel: 'Prête pour livraison' },
   READY_FOR_DELIVERY: { label: 'Prête', color: 'brand', actionLabel: '—' },
   DELIVERY_IN_PROGRESS: { label: 'En route', color: 'brand', actionLabel: '—' },
-  DELIVERED: { label: 'Livrée', color: 'brand', actionLabel: '—' },
+  DELIVERED: { label: 'Livrée', color: 'forest', actionLabel: '—' },
   CANCELLED: { label: 'Annulée', color: 'ink-muted', actionLabel: '—' },
   FAILED: { label: 'Échouée', color: 'error', actionLabel: '—' },
 };
@@ -182,8 +182,8 @@ export default function OrderManager({ orders, onUpdate }: OrderManagerProps) {
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
       error: 'text-error',
-      warning: 'text-warning',
       brand: 'text-brand',
+      forest: 'text-forest-900',
       'ink-muted': 'text-ink-muted',
     };
     return colors[STATUS_TRANSITIONS[status]?.color] || 'text-ink';
@@ -192,8 +192,8 @@ export default function OrderManager({ orders, onUpdate }: OrderManagerProps) {
   const getStatusBgColor = (status: string) => {
     const bgColors: Record<string, string> = {
       error: 'bg-error/5 border-error/30',
-      warning: 'bg-warning/5 border-warning/30',
       brand: 'bg-brand/5 border-brand/30',
+      forest: 'bg-forest-100 border-forest-500/30',
       'ink-muted': 'bg-surface-1 border-divider',
     };
     const colorKey = STATUS_TRANSITIONS[status]?.color;

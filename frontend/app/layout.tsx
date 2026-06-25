@@ -1,8 +1,23 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import { Fraunces, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
 import Footer from './components/Footer';
 import Header from './components/Header';
+
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  variable: '--font-display',
+  display: 'swap',
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-mono',
+  display: 'swap',
+});
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 const SITE_NAME = 'Libreville Eats';
@@ -46,7 +61,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="fr" suppressHydrationWarning>
+    <html lang="fr" className={`${fraunces.variable} ${ibmPlexMono.variable}`} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{

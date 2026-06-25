@@ -374,7 +374,7 @@ export default function MenuManager({ restaurantId, menus, onUpdate }: MenuManag
                                   {dish.price.toLocaleString()} FCFA
                                 </span>
                                 <span className="text-ink-muted">{dish.category}</span>
-                                <span className={`font-semibold ${dish.isAvailable ? 'text-brand' : 'text-error'}`}>
+                                <span className={`font-semibold ${dish.isAvailable ? 'text-forest-600' : 'text-error'}`}>
                                   {dish.isAvailable ? 'Disponible' : 'Indisponible'}
                                 </span>
                               </div>
