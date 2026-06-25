@@ -2,6 +2,10 @@
 
 API REST pour **Libreville Eats**, application de livraison de repas à domicile à Libreville (projet NoSQL — Master I, Groupe 3).
 
+Ce dépôt est centré sur le **backend** : l'API REST, la logique métier, la persistance MongoDB/Redis, et la validation/authentification.
+
+Le **frontend** Next.js est inclus comme un supplément de démonstration pour enrichir la présentation, mais le coeur du projet reste le backend.
+
 Stack : **Node.js**, **Express**, **Mongoose**, **MongoDB**, **Redis** (cache), **JWT**.
 
 ---
