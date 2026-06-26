@@ -51,6 +51,19 @@ const testRestaurant = {
     coordinates: { type: 'Point', coordinates: [9.45, 0.39] },
   },
   isOpen: true,
+  menus: [
+    {
+      name: 'Menu Principal',
+      dishes: [
+        {
+          name: 'Meal One',
+          price: 1200,
+          isAvailable: true,
+          quantity: 1000,
+        },
+      ],
+    },
+  ],
 };
 
 let customerToken;
@@ -61,6 +74,7 @@ let customerId;
 let vendorId;
 let delivererUserId;
 let delivererId;
+let dishId;
 
 describe('API Commandes', () => {
   beforeAll(async () => {
@@ -101,6 +115,7 @@ describe('API Commandes', () => {
     const restaurant = new Restaurant(restaurantPayload);
     await restaurant.save();
     restaurantId = restaurant._id.toString();
+    dishId = restaurant.menus[0].dishes[0]._id.toString();
 
     const delivererPayload = {
       user_id: delivererUserId,
@@ -138,7 +153,7 @@ describe('API Commandes', () => {
           recipientPhone: '+24187650000',
         },
         paymentMethod: 'CARD',
-        items: [{ dishId: new mongoose.Types.ObjectId().toString(), dishName: 'Meal One', quantity: 2, unitPrice: 1200 }],
+        items: [{ dishId, dishName: 'Meal One', quantity: 2, unitPrice: 1200 }],
       });
 
     orderId = createOrderResponse.body.order._id;
@@ -171,7 +186,7 @@ describe('API Commandes', () => {
         },
         paymentMethod: 'CARD',
         items: [
-          { dishId: new mongoose.Types.ObjectId().toString(), dishName: 'Meal One', quantity: 2, unitPrice: 1200 },
+          { dishId, dishName: 'Meal One', quantity: 2, unitPrice: 1200 },
         ],
       });
 
@@ -212,7 +227,7 @@ describe('API Commandes', () => {
           recipientPhone: '+24187650000',
         },
         paymentMethod: 'CARD',
-        items: [{ dishId: new mongoose.Types.ObjectId().toString(), dishName: 'Meal One', quantity: 2, unitPrice: 1200 }],
+        items: [{ dishId, dishName: 'Meal One', quantity: 2, unitPrice: 1200 }],
       });
 
     expect(response.status).toBe(401);
@@ -230,7 +245,7 @@ describe('API Commandes', () => {
           recipientPhone: '+24187650000',
         },
         paymentMethod: 'CARD',
-        items: [{ dishId: new mongoose.Types.ObjectId().toString(), dishName: 'Meal One', quantity: 2, unitPrice: 1200 }],
+        items: [{ dishId, dishName: 'Meal One', quantity: 2, unitPrice: 1200 }],
       });
 
     expect(response.status).toBe(404);
@@ -264,7 +279,7 @@ describe('API Commandes', () => {
           recipientPhone: '+24187650000',
         },
         paymentMethod: 'CARD',
-        items: [{ dishId: new mongoose.Types.ObjectId().toString(), dishName: 'Meal One', quantity: 2, unitPrice: 1200 }],
+        items: [{ dishId, dishName: 'Meal One', quantity: 2, unitPrice: 1200 }],
       });
 
     const createdOrderId = createResponse.body.order._id;
@@ -290,7 +305,7 @@ describe('API Commandes', () => {
           recipientPhone: '+24187650000',
         },
         paymentMethod: 'CARD',
-        items: [{ dishId: new mongoose.Types.ObjectId().toString(), dishName: 'Meal One', quantity: 2, unitPrice: 1200 }],
+        items: [{ dishId, dishName: 'Meal One', quantity: 2, unitPrice: 1200 }],
       });
 
     const createdOrderId = createResponse.body.order._id;
@@ -379,7 +394,7 @@ describe('API Commandes', () => {
           recipientPhone: '+24187650000',
         },
         paymentMethod: 'CARD',
-        items: [{ dishId: new mongoose.Types.ObjectId().toString(), dishName: 'Meal One', quantity: 2, unitPrice: 1200 }],
+        items: [{ dishId, dishName: 'Meal One', quantity: 2, unitPrice: 1200 }],
       });
 
     const createdOrderId = createResponse.body.order._id;

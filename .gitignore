@@ -6,3 +6,5 @@ coverage
 .codegraph
 .hallmark
 .superpowers/
+.CLAUDE.md
+.claude/
