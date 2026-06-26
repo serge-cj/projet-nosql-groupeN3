@@ -26,10 +26,10 @@ interface HomeStats {
   topDistricts: string[];
 }
 
-// Statistiques calculées à partir de la base réelle (aucune valeur figée) :
-// - Ouverts : total exact via la pagination de l'API (isOpen=true)
-// - Plats dispo : plats en stock (isAvailable && quantity > 0) sur un échantillon de restaurants
-// - Quartiers : quartiers distincts effectivement couverts par des restaurants
+// Nous calculons ces statistiques à partir de la base réelle (aucune valeur figée) :
+// - Ouverts : nous obtenons le total exact via la pagination de l'API (isOpen=true)
+// - Plats dispo : nous comptons les plats en stock (isAvailable && quantity > 0) sur un échantillon de restaurants
+// - Quartiers : nous retenons les quartiers distincts effectivement couverts par des restaurants
 async function getHomeStats(): Promise<HomeStats> {
   try {
     const [openRes, sampleRes] = await Promise.all([

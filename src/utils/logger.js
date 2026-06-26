@@ -14,7 +14,7 @@ const baseLogger = pino({
   },
 });
 
-// Standalone logger (for non-HTTP contexts)
+// Nous définissons ici un logger autonome (pour les contextes non HTTP)
 const logger = {
   info: (msg, data = {}) => baseLogger.info(data, msg),
   error: (msg, data = {}) => baseLogger.error(data, msg),
@@ -22,7 +22,7 @@ const logger = {
   debug: (msg, data = {}) => baseLogger.debug(data, msg),
 };
 
-// HTTP logger middleware
+// Nous définissons ici le middleware de journalisation HTTP
 const httpLogger = pinoHttp({
   logger: baseLogger,
   autoLogging: true,

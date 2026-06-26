@@ -26,7 +26,7 @@ async function connectRedis() {
 
     redisClient.on('connect', () => {
       isConnected = true;
-      logger.info('✅ Redis connecté');
+      logger.info('Redis connecté');
     });
 
     redisClient.on('error', (err) => {
@@ -41,7 +41,7 @@ async function connectRedis() {
 
     if (pong === 'PONG') {
       isConnected = true;
-      logger.info('✅ Connexion Redis vérifiée');
+      logger.info('Connexion Redis vérifiée');
     }
   } catch (err) {
     logger.info('Redis non disponible (développement : cache désactivé)');

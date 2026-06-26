@@ -17,10 +17,10 @@ async function listRestaurants(req, res, next) {
     const limitNum = parseInt(limit, 10);
     const skip = (pageNum - 1) * limitNum;
 
-    // Générer la clé de cache
+    // Nous générons la clé de cache
     const cacheKey = cacheService.getRestaurantCacheKey(district, isOpen, q, pageNum, limitNum);
 
-    // Essayer de récupérer depuis le cache
+    // Nous tentons de récupérer la valeur depuis le cache
     const cached = await cacheService.get(cacheKey);
     if (cached) {
       logger.debug('Cache hit pour listRestaurants', { cacheKey });
@@ -46,7 +46,7 @@ async function listRestaurants(req, res, next) {
       },
     };
 
-    // Stocker dans le cache (1 heure)
+    // Nous stockons la réponse dans le cache (1 heure)
     await cacheService.set(cacheKey, response, cacheService.TTL.RESTAURANTS);
     logger.debug('Cache set pour listRestaurants', { cacheKey });
 
@@ -57,7 +57,7 @@ async function listRestaurants(req, res, next) {
   }
 }
 
-// Livrable thème : restaurants ouverts avec au moins un plat disponible
+// Nous livrons ici les restaurants ouverts disposant d'au moins un plat disponible
 async function listOpenRestaurantsWithAvailability(req, res, next) {
   try {
     const query = {
@@ -83,11 +83,11 @@ async function listOpenRestaurantsWithAvailability(req, res, next) {
 async function getRestaurantById(req, res, next) {
   try {
     const { id } = req.params;
-    
-    // Générer la clé de cache
+
+    // Nous générons la clé de cache
     const cacheKey = cacheService.getRestaurantDetailCacheKey(id);
 
-    // Essayer de récupérer depuis le cache
+    // Nous tentons de récupérer la valeur depuis le cache
     const cached = await cacheService.get(cacheKey);
     if (cached) {
       logger.debug('Cache hit pour getRestaurantById', { cacheKey });
@@ -101,7 +101,7 @@ async function getRestaurantById(req, res, next) {
 
     const response = { restaurant };
 
-    // Stocker dans le cache (1 heure)
+    // Nous stockons la réponse dans le cache (1 heure)
     await cacheService.set(cacheKey, response, cacheService.TTL.RESTAURANT_DETAIL);
     logger.debug('Cache set pour getRestaurantById', { cacheKey });
 
@@ -145,7 +145,7 @@ async function updateRestaurant(req, res, next) {
       return next(AppError.notFound('Restaurant introuvable', { id }));
     }
 
-    // Vérifier que l'utilisateur est le propriétaire
+    // Nous vérifions que l'utilisateur est le propriétaire
     if (restaurant.owner_id.toString() !== req.user.id) {
       return next(AppError.forbidden('Accès interdit : vous n\'êtes pas le propriétaire', { restaurantId: id }));
     }
@@ -155,7 +155,7 @@ async function updateRestaurant(req, res, next) {
 
     await restaurant.save();
 
-    // Invalider le cache
+    // Nous invalidons le cache
     await cacheService.del(cacheService.getRestaurantDetailCacheKey(id));
     await cacheService.invalidate('restaurants:*');
     logger.debug('Cache invalidé pour updateRestaurant', { restaurantId: id });
@@ -167,7 +167,7 @@ async function updateRestaurant(req, res, next) {
   }
 }
 
-// ============ MENU CRUD ============
+// ============ CRUD DES MENUS ============
 
 async function createMenu(req, res, next) {
   try {
@@ -179,12 +179,12 @@ async function createMenu(req, res, next) {
       return next(AppError.notFound('Restaurant introuvable', { id }));
     }
 
-    // Vérifier que l'utilisateur est le propriétaire
+    // Nous vérifions que l'utilisateur est le propriétaire
     if (restaurant.owner_id.toString() !== req.user.id) {
       return next(AppError.forbidden('Accès interdit : vous n\'êtes pas le propriétaire', { restaurantId: id }));
     }
 
-    // Ajouter le nouveau menu
+    // Nous ajoutons le nouveau menu
     const newMenu = {
       name: menuData.name,
       description: menuData.description,
@@ -195,7 +195,7 @@ async function createMenu(req, res, next) {
 
     await restaurant.save();
 
-    // Invalider le cache
+    // Nous invalidons le cache
     await cacheService.del(cacheService.getRestaurantDetailCacheKey(id));
     await cacheService.invalidate('restaurants:*');
     logger.debug('Menu créé', { restaurantId: id, menuName: newMenu.name });
@@ -223,7 +223,7 @@ async function getMenus(req, res, next) {
   }
 }
 
-// Retourne les restaurants appartenant à l'utilisateur connecté
+// Nous retournons ici les restaurants appartenant à l'utilisateur connecté
 async function getMyRestaurants(req, res, next) {
   try {
     const userId = req.user.id;
@@ -235,13 +235,13 @@ async function getMyRestaurants(req, res, next) {
   }
 }
 
-// Crée un restaurant minimal pour le vendeur connecté
+// Nous créons ici un restaurant minimal pour le vendeur connecté
 async function createRestaurant(req, res, next) {
   try {
     const userId = req.user.id;
     const { name, address, deliveryZones, phone } = req.body || {};
 
-    // Récupérer info utilisateur pour compléter si nécessaire
+    // Nous récupérons les informations de l'utilisateur afin de compléter si nécessaire
     const user = await User.findById(userId);
     if (!user) return next(AppError.notFound('Utilisateur introuvable', { userId }));
 
@@ -269,7 +269,7 @@ async function createRestaurant(req, res, next) {
 
     await restaurant.save();
 
-    // Invalider le cache
+    // Nous invalidons le cache
     await cacheService.invalidate('restaurants:*');
     logger.debug('Restaurant créé via onboarding', { restaurantId: restaurant._id, ownerId: userId });
 
@@ -290,12 +290,12 @@ async function updateMenu(req, res, next) {
       return next(AppError.notFound('Restaurant introuvable', { id }));
     }
 
-    // Vérifier que l'utilisateur est le propriétaire
+    // Nous vérifions que l'utilisateur est le propriétaire
     if (restaurant.owner_id.toString() !== req.user.id) {
       return next(AppError.forbidden('Accès interdit : vous n\'êtes pas le propriétaire', { restaurantId: id }));
     }
 
-    // Trouver et mettre à jour le menu
+    // Nous recherchons le menu à mettre à jour
     const menu = restaurant.menus.id(menuId);
     if (!menu) {
       return next(AppError.notFound('Menu introuvable', { menuId }));
@@ -306,7 +306,7 @@ async function updateMenu(req, res, next) {
 
     await restaurant.save();
 
-    // Invalider le cache
+    // Nous invalidons le cache
     await cacheService.del(cacheService.getRestaurantDetailCacheKey(id));
     await cacheService.invalidate('restaurants:*');
     logger.debug('Menu mis à jour', { restaurantId: id, menuId });
@@ -327,12 +327,12 @@ async function deleteMenu(req, res, next) {
       return next(AppError.notFound('Restaurant introuvable', { id }));
     }
 
-    // Vérifier que l'utilisateur est le propriétaire
+    // Nous vérifions que l'utilisateur est le propriétaire
     if (restaurant.owner_id.toString() !== req.user.id) {
       return next(AppError.forbidden('Accès interdit : vous n\'êtes pas le propriétaire', { restaurantId: id }));
     }
 
-    // Supprimer le menu
+    // Nous recherchons le menu à supprimer
     const menu = restaurant.menus.id(menuId);
     if (!menu) {
       return next(AppError.notFound('Menu introuvable', { menuId }));
@@ -343,7 +343,7 @@ async function deleteMenu(req, res, next) {
 
     await restaurant.save();
 
-    // Invalider le cache
+    // Nous invalidons le cache
     await cacheService.del(cacheService.getRestaurantDetailCacheKey(id));
     await cacheService.invalidate('restaurants:*');
     logger.debug('Menu supprimé', { restaurantId: id, menuId });
@@ -355,7 +355,7 @@ async function deleteMenu(req, res, next) {
   }
 }
 
-// ============ DISH CRUD ============
+// ============ CRUD DES PLATS ============
 
 async function addDishToMenu(req, res, next) {
   try {
@@ -367,24 +367,24 @@ async function addDishToMenu(req, res, next) {
       return next(AppError.notFound('Restaurant introuvable', { id }));
     }
 
-    // Vérifier que l'utilisateur est le propriétaire
+    // Nous vérifions que l'utilisateur est le propriétaire
     if (restaurant.owner_id.toString() !== req.user.id) {
       return next(AppError.forbidden('Accès interdit : vous n\'êtes pas le propriétaire', { restaurantId: id }));
     }
 
-    // Trouver le menu
+    // Nous recherchons le menu cible
     const menu = restaurant.menus.id(menuId);
     if (!menu) {
       return next(AppError.notFound('Menu introuvable', { menuId }));
     }
 
-    // Ajouter le plat
+    // Nous ajoutons le plat
     menu.dishes.push(dishData);
     restaurant.metadata.updatedAt = new Date();
 
     await restaurant.save();
 
-    // Invalider le cache
+    // Nous invalidons le cache
     await cacheService.del(cacheService.getRestaurantDetailCacheKey(id));
     await cacheService.invalidate('restaurants:*');
     logger.debug('Plat ajouté au menu', { restaurantId: id, menuId, dishName: dishData.name });
@@ -406,18 +406,18 @@ async function updateDish(req, res, next) {
       return next(AppError.notFound('Restaurant introuvable', { id }));
     }
 
-    // Vérifier que l'utilisateur est le propriétaire
+    // Nous vérifions que l'utilisateur est le propriétaire
     if (restaurant.owner_id.toString() !== req.user.id) {
       return next(AppError.forbidden('Accès interdit : vous n\'êtes pas le propriétaire', { restaurantId: id }));
     }
 
-    // Trouver le menu
+    // Nous recherchons le menu cible
     const menu = restaurant.menus.id(menuId);
     if (!menu) {
       return next(AppError.notFound('Menu introuvable', { menuId }));
     }
 
-    // Trouver et mettre à jour le plat
+    // Nous recherchons et mettons à jour le plat
     const dish = menu.dishes.id(dishId);
     if (!dish) {
       return next(AppError.notFound('Plat introuvable', { dishId }));
@@ -428,7 +428,7 @@ async function updateDish(req, res, next) {
 
     await restaurant.save();
 
-    // Invalider le cache
+    // Nous invalidons le cache
     await cacheService.del(cacheService.getRestaurantDetailCacheKey(id));
     await cacheService.invalidate('restaurants:*');
     logger.debug('Plat mis à jour', { restaurantId: id, menuId, dishId });
@@ -449,18 +449,18 @@ async function deleteDish(req, res, next) {
       return next(AppError.notFound('Restaurant introuvable', { id }));
     }
 
-    // Vérifier que l'utilisateur est le propriétaire
+    // Nous vérifions que l'utilisateur est le propriétaire
     if (restaurant.owner_id.toString() !== req.user.id) {
       return next(AppError.forbidden('Accès interdit : vous n\'êtes pas le propriétaire', { restaurantId: id }));
     }
 
-    // Trouver le menu
+    // Nous recherchons le menu cible
     const menu = restaurant.menus.id(menuId);
     if (!menu) {
       return next(AppError.notFound('Menu introuvable', { menuId }));
     }
 
-    // Supprimer le plat
+    // Nous supprimons le plat
     const dish = menu.dishes.id(dishId);
     if (!dish) {
       return next(AppError.notFound('Plat introuvable', { dishId }));
@@ -471,7 +471,7 @@ async function deleteDish(req, res, next) {
 
     await restaurant.save();
 
-    // Invalider le cache
+    // Nous invalidons le cache
     await cacheService.del(cacheService.getRestaurantDetailCacheKey(id));
     await cacheService.invalidate('restaurants:*');
     logger.debug('Plat supprimé', { restaurantId: id, menuId, dishId });

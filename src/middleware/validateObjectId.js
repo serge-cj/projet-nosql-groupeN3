@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 const AppError = require('../utils/AppError');
 
-// Middleware pour valider les paramètres ObjectId
-// À utiliser sur les routes qui ont des paramètres :id
+// Nous définissons ce middleware afin de valider les paramètres ObjectId.
+// Nous l'utilisons sur les routes qui possèdent des paramètres :id
 const validateObjectId = (paramName = 'id') => {
   return (req, res, next) => {
     const id = req.params[paramName];

@@ -72,7 +72,7 @@ const restaurantSchema = new mongoose.Schema(
       },
     },
 
-    // Horaires d'ouverture
+    // Nous modélisons ici les horaires d'ouverture
     hours: {
       monday: {
         open: String,
@@ -121,7 +121,7 @@ const restaurantSchema = new mongoose.Schema(
       default: 0,
     },
 
-    // Menus embarqués avec plats
+    // Nous embarquons directement les menus et leurs plats au sein du document
     menus: [
       {
         name: {
@@ -167,7 +167,7 @@ const restaurantSchema = new mongoose.Schema(
             preparationTime: {
               type: Number,
               default: 15,
-            }, // minutes
+            }, // nous exprimons cette durée en minutes
           },
         ],
       },
@@ -177,7 +177,7 @@ const restaurantSchema = new mongoose.Schema(
       {
         zone: String,
         deliveryFee: Number,
-        deliveryTime: Number, // minutes
+        deliveryTime: Number, // nous exprimons cette durée en minutes
       },
     ],
 
@@ -209,16 +209,16 @@ const restaurantSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Index géospatial pour les restaurants à proximité
+// Nous créons un index géospatial afin de localiser les restaurants à proximité
 restaurantSchema.index({ 'address.coordinates': '2dsphere' });
 
-// Index composé : quartier + ouvert
+// Nous créons un index composé sur le quartier et le statut d'ouverture
 restaurantSchema.index({ 'address.district': 1, 'isOpen': 1 });
 
-// Index pour la disponibilité des plats
+// Nous créons un index afin d'accélérer les requêtes sur la disponibilité des plats
 restaurantSchema.index({ 'menus.dishes.isAvailable': 1 });
 
-// Index text pour la recherche plein-texte (nom du restaurant, description des menus/plats)
+// Nous créons un index text afin de permettre la recherche plein texte (nom du restaurant, description des menus et des plats)
 restaurantSchema.index(
   {
     name: 'text',

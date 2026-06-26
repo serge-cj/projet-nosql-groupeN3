@@ -2,12 +2,12 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-// Mock next/navigation useSearchParams used in the component
+// Nous simulons useSearchParams de next/navigation utilisé par le composant
 jest.mock('next/navigation', () => ({
   useSearchParams: () => ({ get: () => null }),
 }));
 
-// Mock global fetch
+// Nous simulons l'appel global fetch
 beforeEach(() => {
   (global as any).fetch = jest.fn(() =>
     Promise.resolve({
@@ -32,13 +32,13 @@ it('renders discovery header, search and action buttons (visual smoke)', async (
   expect(screen.getByText(/Restaurants à Libreville/i)).toBeInTheDocument();
   expect(screen.getByText(/Trouver vite/i)).toBeInTheDocument();
 
-  // wait for fetch to complete and UI to stabilize
+  // Nous attendons que l'appel fetch se termine et que l'interface se stabilise
   await waitFor(() => expect(screen.getByPlaceholderText(/Chercher a restaurant|Chercher un restaurant|Chercher/i)).toBeInTheDocument());
 
-  // action buttons
+  // Nous vérifions les boutons d'action
   expect(screen.getByRole('button', { name: /Explorer/i })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /Réinitialiser/i })).toBeInTheDocument();
 
-  // snapshot for visual regression
+  // Nous capturons un instantané pour la détection de régressions visuelles
   expect(container).toMatchSnapshot();
 });

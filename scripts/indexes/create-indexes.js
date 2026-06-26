@@ -5,13 +5,13 @@ const { User, Restaurant, Commande, Deliverer } = require('../../src/models');
 const { logger } = require('../../src/utils/logger');
 
 /**
- * Verify all indexes for performance optimization
+ * Nous vérifions ici l'ensemble des index destinés à l'optimisation des performances.
  *
- * Indexes strategy:
- * 1. Authentication & Lookups (high-frequency)
- * 2. Geospatial queries (location-based features)
- * 3. Compound indexes (multi-field filters)
- * 4. Sorting optimization
+ * Notre stratégie d'indexation :
+ * 1. Authentification et lookups (haute fréquence)
+ * 2. Requêtes géospatiales (fonctionnalités basées sur la localisation)
+ * 3. Index composés (filtres multi-champs)
+ * 4. Optimisation du tri
  */
 async function createIndexes() {
   try {
@@ -23,60 +23,60 @@ async function createIndexes() {
       w: 'majority',
     });
 
-    logger.info('✅ MongoDB connecté');
-    logger.info('🔧 Vérification des index...\n');
+    logger.info('MongoDB connecté');
+    logger.info('Vérification des index...\n');
 
-    // ============ Helper to safely create/verify index ============
+    // ============ Fonction utilitaire pour créer/vérifier un index en toute sécurité ============
     async function ensureIndex(collection, fields, options = {}) {
       try {
         const indexName = options.name || Object.keys(fields).join('_');
-        
-        // Try to create, catch if exists
+
+        // Nous tentons la création et interceptons le cas où l'index existe déjà
         await collection.createIndex(fields, options);
         return true;
       } catch (err) {
         if (err.message.includes('Index already exists')) {
-          return true; // Index already exists, which is fine
+          return true; // L'index existe déjà, ce qui ne pose aucun problème
         }
-        // Log other errors but don't throw
+        // Nous journalisons les autres erreurs sans interrompre l'exécution
         logger.debug(`Index operation info: ${err.message}`);
         return true;
       }
     }
 
-    // ============ User Indexes ============
-    logger.info('📇 Collection Utilisateurs:');
+    // ============ Index de la collection Utilisateurs ============
+    logger.info('Collection Utilisateurs:');
 
-    // Auth lookup (email unique)
+    // Lookup d'authentification (email unique)
     await ensureIndex(User.collection, { email: 1 }, { unique: true });
-    logger.info('  ✅ email (unique)');
+    logger.info('  email (unique)');
 
-    // Geospatial for nearby users
+    // Index géospatial pour les utilisateurs à proximité
     await ensureIndex(User.collection, { 'addresses.coordinates': '2dsphere' });
-    logger.info('  ✅ addresses.coordinates (geospatial)');
+    logger.info('  addresses.coordinates (geospatial)');
 
-    // ============ Restaurant Indexes ============
-    logger.info('\n📇 Collection Restaurants:');
+    // ============ Index de la collection Restaurants ============
+    logger.info('\nCollection Restaurants:');
 
-    // Geospatial for nearby restaurants
+    // Index géospatial pour les restaurants à proximité
     await ensureIndex(Restaurant.collection, {
       'address.coordinates': '2dsphere',
     });
-    logger.info('  ✅ address.coordinates (geospatial)');
+    logger.info('  address.coordinates (geospatial)');
 
-    // Compound: district + isOpen (list restaurants in district that are open)
+    // Index composé : quartier + ouverture (lister les restaurants ouverts d'un quartier)
     await ensureIndex(
       Restaurant.collection,
       { 'address.district': 1, 'isOpen': 1 },
       { name: 'idx_district_open' }
     );
-    logger.info('  ✅ address.district + isOpen (compound)');
+    logger.info('  address.district + isOpen (compound)');
 
-    // Dish availability
+    // Disponibilité des plats
     await ensureIndex(Restaurant.collection, { 'menus.dishes.isAvailable': 1 });
-    logger.info('  ✅ menus.dishes.isAvailable');
+    logger.info('  menus.dishes.isAvailable');
 
-    // Text index for full-text search (name, menu names, dish names/descriptions)
+    // Index texte pour la recherche plein-texte (nom, noms de menus, noms/descriptions de plats)
     await ensureIndex(
       Restaurant.collection,
       {
@@ -90,60 +90,60 @@ async function createIndexes() {
         weights: { name: 10, 'menus.dishes.name': 5, 'menus.name': 3, 'menus.dishes.description': 1 },
       }
     );
-    logger.info('  ✅ name + menus.dishes.name (text)');
+    logger.info('  name + menus.dishes.name (text)');
 
-    // ============ Commande Indexes ============
-    logger.info('\n📇 Collection Commandes:');
+    // ============ Index de la collection Commandes ============
+    logger.info('\nCollection Commandes:');
 
-    // Compound: status + restaurant_id (list active orders by restaurant)
+    // Index composé : statut + restaurant_id (lister les commandes actives par restaurant)
     await ensureIndex(
       Commande.collection,
       { status: 1, restaurant_id: 1 },
       { name: 'idx_status_restaurant' }
     );
-    logger.info('  ✅ status + restaurant_id (compound) - CRITICAL');
+    logger.info('  status + restaurant_id (compound) - CRITICAL');
 
-    // Compound: customer_id + createdAt (order history sorted by date)
+    // Index composé : customer_id + createdAt (historique des commandes trié par date)
     await ensureIndex(
       Commande.collection,
       { customer_id: 1, createdAt: -1 },
       { name: 'idx_customer_date' }
     );
-    logger.info('  ✅ customer_id + createdAt DESC (compound)');
+    logger.info('  customer_id + createdAt DESC (compound)');
 
-    // Deliverer tracking
+    // Suivi des livreurs
     await ensureIndex(
       Commande.collection,
       { deliverer_id: 1, status: 1 },
       { name: 'idx_deliverer_status' }
     );
-    logger.info('  ✅ deliverer_id + status (compound)');
+    logger.info('  deliverer_id + status (compound)');
 
-    // GPS tracking geospatial
+    // Index géospatial pour le suivi GPS
     await ensureIndex(
       Commande.collection,
       { 'deliveryTracking.coordinates': '2dsphere' }
     );
-    logger.info('  ✅ deliveryTracking.coordinates (geospatial)');
+    logger.info('  deliveryTracking.coordinates (geospatial)');
 
-    // ============ Deliverer Indexes ============
-    logger.info('\n📇 Collection Livreurs:');
+    // ============ Index de la collection Livreurs ============
+    logger.info('\nCollection Livreurs:');
 
-    // Geospatial for nearby deliverers
+    // Index géospatial pour les livreurs à proximité
     await ensureIndex(Deliverer.collection, { 'currentLocation': '2dsphere' });
-    logger.info('  ✅ currentLocation (geospatial)');
+    logger.info('  currentLocation (geospatial)');
 
-    // Find available deliverers
+    // Recherche des livreurs disponibles
     await ensureIndex(
       Deliverer.collection,
       { isAvailable: 1, isActive: 1 },
       { name: 'idx_available' }
     );
-    logger.info('  ✅ isAvailable + isActive (compound)');
+    logger.info('  isAvailable + isActive (compound)');
 
-    // ============ Summary ============
-    logger.info('\n✅ Tous les index vérifiés avec succès! 🎉\n');
-    logger.info('📊 Résumé des index:\n');
+    // ============ Récapitulatif ============
+    logger.info('\nTous les index vérifiés avec succès!\n');
+    logger.info('Résumé des index:\n');
     logger.info('  Unique Constraints:');
     logger.info('    • User.email\n');
     logger.info('  Geospatial (2dsphere):');
@@ -160,8 +160,8 @@ async function createIndexes() {
     logger.info('    • Restaurant (district + isOpen)');
     logger.info('    • Deliverer (isAvailable + isActive)\n');
 
-    // ============ Display Statistiques des index ============
-    logger.info('📈 Statistiques des index:\n');
+    // ============ Affichage des statistiques des index ============
+    logger.info('Statistiques des index:\n');
 
     const userIndexes = await User.collection.getIndexes();
     logger.info(
@@ -183,12 +183,12 @@ async function createIndexes() {
       `  Deliverers: ${Object.keys(delivererIndexes).length - 1} indexes (+ _id)\n`
     );
 
-    logger.info('✨ Next: Run queries with .explain("executionStats") to verify IXSCAN usage.\n');
+    logger.info('Étape suivante : nous exécutons les requêtes avec .explain("executionStats") pour vérifier l\'utilisation d\'un IXSCAN.\n');
 
     await mongoose.disconnect();
     logger.info('MongoDB déconnecté');
   } catch (err) {
-    logger.error('❌ Échec de la vérification des index', {
+    logger.error('Échec de la vérification des index', {
       message: err.message,
       stack: err.stack,
     });
@@ -196,7 +196,7 @@ async function createIndexes() {
   }
 }
 
-// Run index creation
+// Nous lançons la création des index
 if (require.main === module) {
   createIndexes();
 }

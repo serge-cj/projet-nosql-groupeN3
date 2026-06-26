@@ -25,7 +25,7 @@ export default function VendorRegisterPage() {
     setError('');
     setFieldErrors({});
     setLoading(true);
-    // Client-side validation
+    // Nous effectuons ici la validation côté client
     const phoneRegex = /^\+241\d{8}$/;
     const newFieldErrors: Record<string, string> = {};
     if (!phoneRegex.test(phone)) newFieldErrors.phone = 'Numéro invalide (ex: +24187650123)';
@@ -58,7 +58,7 @@ export default function VendorRegisterPage() {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
 
-      // Create restaurant for this vendor during onboarding
+      // Nous créons le restaurant associé à ce commerçant lors de l'inscription
       try {
         const restResp = await api.post('/restaurants', {
           name: restaurantName,
@@ -76,7 +76,7 @@ export default function VendorRegisterPage() {
           e.response?.data?.error ||
           e.response?.data?.message ||
           'Impossible de créer votre restaurant. Vérifiez les champs et réessayez.';
-        // If backend returns field-level errors, map them to fields
+        // Si le serveur renvoie des erreurs propres à certains champs, nous les associons aux champs correspondants
         if (e.response?.data?.errors && typeof e.response.data.errors === 'object') {
           setFieldErrors(e.response.data.errors);
         }
@@ -88,7 +88,7 @@ export default function VendorRegisterPage() {
       router.push('/restaurant/dashboard');
     } catch (err: any) {
       const message = err.response?.data?.error || err.response?.data?.message || "Erreur lors de l'inscription";
-      // map possible validation errors
+      // Nous associons les éventuelles erreurs de validation aux champs correspondants
       if (err.response?.data?.errors && typeof err.response.data.errors === 'object') {
         setFieldErrors(err.response.data.errors);
       }

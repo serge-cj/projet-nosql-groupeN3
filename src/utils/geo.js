@@ -1,4 +1,4 @@
-// Distance à vol d'oiseau entre deux points [longitude, latitude] (formule de Haversine)
+// Nous calculons ici la distance à vol d'oiseau entre deux points [longitude, latitude] (formule de Haversine)
 function haversineDistanceKm([lon1, lat1], [lon2, lat2]) {
   const toRad = (deg) => (deg * Math.PI) / 180;
   const R = 6371;

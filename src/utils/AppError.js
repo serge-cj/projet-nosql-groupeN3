@@ -10,7 +10,7 @@ class AppError extends Error {
     Error.captureStackTrace(this, this.constructor);
   }
 
-  // Méthodes statiques pour les erreurs courantes
+  // Nous définissons ici des méthodes statiques pour les erreurs courantes
   static badRequest(message, details = null) {
     return new AppError(message, 400, 'BAD_REQUEST', details);
   }

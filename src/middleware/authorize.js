@@ -1,9 +1,9 @@
 const AppError = require('../utils/AppError');
 
 /**
- * Middleware pour autoriser l'accès basé sur les rôles
- * @param  {...string} allowedRoles - Les rôles autorisés à accéder à la route
- * @returns {Function} - Middleware Express
+ * Nous définissons ce middleware afin d'autoriser l'accès selon les rôles.
+ * @param  {...string} allowedRoles - Les rôles que nous autorisons à accéder à la route
+ * @returns {Function} - Le middleware Express que nous construisons
  */
 function authorize(...allowedRoles) {
   return (req, res, next) => {

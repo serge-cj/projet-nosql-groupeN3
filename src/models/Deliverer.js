@@ -51,14 +51,14 @@ const delivererSchema = new mongoose.Schema(
       insuranceExpiry: Date,
     },
 
-    // Position en temps réel
+    // Nous modélisons ici la position du livreur en temps réel
     currentLocation: {
       type: {
         type: String,
         enum: ['Point'],
         default: 'Point',
       },
-      coordinates: [Number], // [longitude, latitude]
+      coordinates: [Number], // nous stockons les coordonnées au format [longitude, latitude]
       lastUpdated: Date,
     },
 
@@ -98,7 +98,7 @@ const delivererSchema = new mongoose.Schema(
       averageDeliveryTime: {
         type: Number,
         default: 0,
-      }, // minutes
+      }, // nous exprimons cette durée en minutes
     },
 
     bankInfo: {
@@ -196,10 +196,10 @@ const delivererSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Index géospatial pour les livreurs à proximité
+// Nous créons un index géospatial afin de localiser les livreurs à proximité
 delivererSchema.index({ 'currentLocation': '2dsphere' });
 
-// Index pour les livreurs disponibles
+// Nous créons un index afin d'identifier rapidement les livreurs disponibles
 delivererSchema.index({ isAvailable: 1, isActive: 1 });
 
 module.exports = mongoose.model('Deliverer', delivererSchema);

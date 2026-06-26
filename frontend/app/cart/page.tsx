@@ -166,7 +166,7 @@ export default function CartPage() {
             </div>
           ) : (
             <form className="grid gap-8 lg:grid-cols-3" onSubmit={handleCheckout}>
-              {/* Items and delivery */}
+              {/* Nous affichons ici les articles ainsi que les informations de livraison */}
               <div className="lg:col-span-2 space-y-6">
                 {hasMultipleRestaurants && (
                   <div className="surface-card border border-brand/30 bg-soft p-4 text-sm text-brand">
@@ -298,7 +298,7 @@ export default function CartPage() {
                 </div>
               </div>
 
-              {/* Summary Card */}
+              {/* Nous présentons ici la carte récapitulative de la commande */}
               <div className="lg:col-span-1">
                 <div className="surface-card space-y-4 p-6 lg:sticky lg:top-24">
                   <h2 className="font-semibold text-ink">Récapitulatif</h2>

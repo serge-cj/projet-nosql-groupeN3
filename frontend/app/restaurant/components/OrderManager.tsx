@@ -202,7 +202,7 @@ export default function OrderManager({ orders, onUpdate }: OrderManagerProps) {
 
   return (
     <section className="space-y-6">
-      {/* En-tête et filtres */}
+      {/* Nous affichons ici l'en-tête et les filtres */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-2xl font-semibold text-ink">Commandes</h2>
@@ -216,7 +216,7 @@ export default function OrderManager({ orders, onUpdate }: OrderManagerProps) {
           </div>
         </div>
 
-        {/* Barre de recherche et filtres */}
+        {/* Nous proposons ici la barre de recherche et les filtres */}
         <div className="grid gap-3 sm:grid-cols-2">
           <input
             type="text"
@@ -247,7 +247,7 @@ export default function OrderManager({ orders, onUpdate }: OrderManagerProps) {
         </div>
       )}
 
-      {/* Commandes actives */}
+      {/* Nous listons ici les commandes actives */}
       {activeOrders.length > 0 && (
         <div>
           <h3 className="mb-4 font-semibold text-ink">Commandes en cours ({activeOrders.length})</h3>
@@ -264,7 +264,7 @@ export default function OrderManager({ orders, onUpdate }: OrderManagerProps) {
                   key={order._id}
                   className="surface-card rounded-card border border-divider p-4 transition-all"
                 >
-                  {/* En-tête de la commande */}
+                  {/* Nous affichons ici l'en-tête de la commande */}
                   <div className="space-y-3">
                     <div className="flex items-start justify-between gap-4">
                       <div className="min-w-0 flex-1">
@@ -305,7 +305,7 @@ export default function OrderManager({ orders, onUpdate }: OrderManagerProps) {
                       </div>
                     </div>
 
-                    {/* Articles (aperçu) */}
+                    {/* Nous présentons ici un aperçu des articles */}
                     {order.items && order.items.length > 0 && (
                       <div className="border-t border-divider pt-3">
                         <div className="space-y-1">
@@ -321,7 +321,7 @@ export default function OrderManager({ orders, onUpdate }: OrderManagerProps) {
                       </div>
                     )}
 
-                    {/* Assignation de livreur */}
+                    {/* Nous gérons ici l'assignation d'un livreur */}
                     {assigningOrderId === order._id && (
                       <div className="mt-4 rounded-card border border-divider bg-surface-2 p-4">
                         <label className="text-sm font-semibold text-ink">Sélectionner un livreur</label>
@@ -364,7 +364,7 @@ export default function OrderManager({ orders, onUpdate }: OrderManagerProps) {
                       </div>
                     )}
 
-                    {/* Bouton développer */}
+                    {/* Nous proposons ici le bouton permettant de développer les détails */}
                     <button
                       type="button"
                       onClick={() => setExpandedOrderId(isExpanded ? null : order._id)}
@@ -374,10 +374,10 @@ export default function OrderManager({ orders, onUpdate }: OrderManagerProps) {
                     </button>
                   </div>
 
-                  {/* Détails expandables */}
+                  {/* Nous affichons ici les détails développables */}
                   {isExpanded && (
                     <div className="mt-4 space-y-4 border-t border-divider pt-4">
-                      {/* Livraison */}
+                      {/* Nous affichons ici les informations de livraison */}
                       <div>
                         <h4 className="mb-2 text-xs font-semibold uppercase text-ink-muted">Livraison</h4>
                         <div className="space-y-1 text-sm text-ink">
@@ -389,7 +389,7 @@ export default function OrderManager({ orders, onUpdate }: OrderManagerProps) {
                         </div>
                       </div>
 
-                      {/* Articles complets */}
+                      {/* Nous affichons ici la liste complète des articles */}
                       <div>
                         <h4 className="mb-2 text-xs font-semibold uppercase text-ink-muted">Articles ({order.items?.length})</h4>
                         <div className="space-y-2">
@@ -404,7 +404,7 @@ export default function OrderManager({ orders, onUpdate }: OrderManagerProps) {
                         </div>
                       </div>
 
-                      {/* Prix détaillé */}
+                      {/* Nous détaillons ici le prix de la commande */}
                       <div className="space-y-1 border-t border-divider pt-3 text-sm">
                         <div className="flex justify-between">
                           <span className="text-ink-muted">Sous-total</span>
@@ -424,7 +424,7 @@ export default function OrderManager({ orders, onUpdate }: OrderManagerProps) {
                         </div>
                       </div>
 
-                      {/* Client */}
+                      {/* Nous affichons ici les informations relatives au livreur */}
                       <div>
                         <h4 className="mb-2 text-xs font-semibold uppercase text-ink-muted">Livreur</h4>
                         <p className="text-sm text-ink">{getDelivererName(order.deliverer_id)}</p>
@@ -449,7 +449,7 @@ export default function OrderManager({ orders, onUpdate }: OrderManagerProps) {
         </div>
       )}
 
-      {/* Commandes terminées */}
+      {/* Nous listons ici les commandes terminées */}
       {completedOrders.length > 0 && (
         <div>
           <h3 className="mb-4 font-semibold text-ink-muted">Commandes terminées ({completedOrders.length})</h3>
@@ -485,7 +485,7 @@ export default function OrderManager({ orders, onUpdate }: OrderManagerProps) {
         </div>
       )}
 
-      {/* Aucune commande */}
+      {/* Nous affichons ici un message lorsqu'aucune commande n'est trouvée */}
       {filteredOrders.length === 0 && (
         <div className="surface-card rounded-card border border-divider p-12 text-center">
           <p className="font-semibold text-ink">Aucune commande trouvée</p>

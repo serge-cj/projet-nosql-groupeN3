@@ -388,7 +388,7 @@ export default function RestaurantsPageClient() {
                         <div className="grid gap-2 text-sm text-ink-muted">
                           <div className="flex items-center justify-between gap-2 rounded-pill border border-divider bg-surface-1 px-3 py-2">
                             <span className="font-mono font-semibold text-mango-700">{restaurant.rating ? restaurant.rating.toFixed(1) : '—'}</span>
-                            {restaurant.rating ? <StarRating rating={restaurant.rating} size={14} /> : <span>☆☆☆☆☆</span>}
+                            {restaurant.rating ? <StarRating rating={restaurant.rating} size={14} /> : null}
                           </div>
                           <div className="flex items-center justify-between gap-2 rounded-pill border border-divider bg-surface-1 px-3 py-2">
                             <span>{restaurant.deliveryTime ?? '30-40'} min</span>

@@ -16,14 +16,14 @@ describe('API Module', () => {
   });
 
   it('should have a request interceptor registered', () => {
-    // Axios interceptor handlers are stored internally, but use() returns a numeric id
+    // Nous savons que les gestionnaires d'intercepteurs Axios sont stockés en interne, mais use() renvoie un identifiant numérique
     const requestInterceptorId = api.interceptors.request.use(
       (config) => config,
       (error) => Promise.reject(error)
     );
-    // Successfully registered means we got a non-negative number back
+    // Nous considérons l'enregistrement réussi si nous obtenons un nombre non négatif
     expect(requestInterceptorId).toBeGreaterThanOrEqual(0);
-    // Eject the test handler we just added
+    // Nous retirons le gestionnaire de test que nous venons d'ajouter
     api.interceptors.request.eject(requestInterceptorId);
   });
 
@@ -46,26 +46,26 @@ describe('API Module', () => {
       localStorage.setItem('token', 'test-jwt-token');
       const config: any = { headers: {} };
 
-      // The first registered interceptor (from api.ts) runs on every request
-      // We need to get the interceptor handler directly
+      // Nous savons que le premier intercepteur enregistré (depuis api.ts) s'exécute à chaque requête
+      // Nous devons accéder directement au gestionnaire d'intercepteur
       const handlers = (api.interceptors.request as any).handlers;
       expect(handlers).toBeDefined();
     });
 
     it('request interceptor skips Authorization when no token', () => {
-      // Check that the interceptor runs without errors when token is missing
+      // Nous vérifions que l'intercepteur s'exécute sans erreur lorsque le jeton est absent
       const config: any = { headers: {} };
-      // This is a smoke test — the interceptor should not throw
+      // Nous réalisons ici un test de fumée : l'intercepteur ne doit pas lever d'exception
       expect(() => {
-        // Manually trigger the interceptor by making a request
+        // Nous déclenchons manuellement l'intercepteur en simulant une requête
         const adapter = () =>
           Promise.resolve({ data: {}, status: 200, statusText: 'OK', headers: {}, config });
-        // We just verify no error is thrown when constructing
+        // Nous vérifions simplement qu'aucune erreur n'est levée lors de la construction
       }).not.toThrow();
     });
   });
 
-  describe('response interceptor — 401 redirect (integration smoke test)', () => {
+  describe('response interceptor — redirection 401 (test de fumée d\'intégration)', () => {
     it('should not throw when a request succeeds', async () => {
       const adapter = jest.fn().mockResolvedValue({
         data: { message: 'ok' },

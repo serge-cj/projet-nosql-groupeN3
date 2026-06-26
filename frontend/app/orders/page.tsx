@@ -48,11 +48,11 @@ export default function OrdersPage() {
     async function fetchOrders() {
       setLoading(true);
       try {
-        // Check if specific order IDs are provided via ?ids query param
+        // Nous vérifions si des identifiants de commandes spécifiques sont fournis via le paramètre ?ids
         const urlSearch = new URLSearchParams(window.location.search);
         const idsParam = urlSearch.get('ids');
         if (idsParam) {
-          // Multi-order checkout: fetch specific orders by ID
+          // Cas d'une validation multi-commandes : nous récupérons les commandes spécifiques par identifiant
           const orderIds = idsParam.split(',').filter(id => id.trim());
           const responses = await Promise.all(
             orderIds.map(id => api.get(`/orders/${id.trim()}`))
@@ -60,7 +60,7 @@ export default function OrdersPage() {
           const fetchedOrders = responses.map(res => res.data.order ?? res.data).filter(Boolean);
           setOrders(fetchedOrders);
         } else {
-          // Fetch all orders
+          // Nous récupérons l'ensemble des commandes
           const response = await api.get('/orders');
           setOrders(response.data.orders ?? response.data ?? []);
         }

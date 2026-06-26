@@ -6,7 +6,7 @@ const AppError = require('../utils/AppError');
 const { emitToRoom } = require('../socket');
 const { haversineDistanceKm } = require('../utils/geo');
 
-// Pousse une position horodatée dans le tableau deliveryTracking de la
+// Nous ajoutons une position horodatée dans le tableau deliveryTracking de la
 // commande en cours de livraison par ce livreur (défi technique du thème :
 // suivi GPS du livreur pendant la course).
 async function trackActiveOrderDelivery(delivererId, lat, lng) {
@@ -119,12 +119,12 @@ async function updateDelivererLocation(req, res, next) {
       return next(AppError.notFound('Livreur introuvable', { id }));
     }
 
-    // Vérifier que l'utilisateur est le livreur lui-même ou un admin
+    // Nous vérifions que l'utilisateur est le livreur lui-même ou un administrateur
     if (deliverer._id.toString() !== req.user.id && req.user.role !== 'ADMIN') {
       return next(AppError.forbidden('Accès interdit', { delivererId: id, userId: req.user.id }));
     }
 
-    // Mettre à jour la position
+    // Nous mettons à jour la position
     deliverer.currentLocation = {
       type: 'Point',
       coordinates: [parseFloat(lng), parseFloat(lat)],
@@ -133,7 +133,7 @@ async function updateDelivererLocation(req, res, next) {
 
     await deliverer.save();
 
-    // Émettre la position GPS via Socket.io à la room du livreur
+    // Nous émettons la position GPS via Socket.io à la room du livreur
     emitToRoom(`deliverer:${id}`, 'location:updated', {
       delivererId: id,
       lat,
@@ -141,7 +141,7 @@ async function updateDelivererLocation(req, res, next) {
       timestamp: new Date(),
     });
 
-    // Si une livraison est en cours, alimenter le suivi GPS de la commande
+    // Si une livraison est en cours, nous alimentons le suivi GPS de la commande
     const trackedOrderId = await trackActiveOrderDelivery(id, lat, lng);
     if (trackedOrderId) {
       logger.debug('Position GPS ajoutée au suivi de la commande', {

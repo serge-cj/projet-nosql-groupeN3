@@ -269,7 +269,7 @@ describe('Cart Helper Functions', () => {
         },
         {
           id: 'dish-2',
-          // Missing required fields
+          // Nous omettons volontairement les champs requis
           name: 'Invalid Dish',
         },
       ];

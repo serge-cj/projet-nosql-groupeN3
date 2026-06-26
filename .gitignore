@@ -1,10 +1,8 @@
-node_modules
+node_modules/
 .env
 .env.local
 .next
-coverage
-.codegraph
-.hallmark
-.superpowers/
-.CLAUDE.md
-.claude/
+coverage/
+.DS_Store
+backup_mongo/
+.thunder-client/

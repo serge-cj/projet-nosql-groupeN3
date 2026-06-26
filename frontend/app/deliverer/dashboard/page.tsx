@@ -58,7 +58,7 @@ export default function DelivererDashboard() {
     async function fetchDeliveries() {
       setLoading(true);
       try {
-        // Fetch orders that are ready for delivery or in progress
+        // Nous récupérons les commandes prêtes à être livrées ou en cours de livraison
         const response = await api.get('/orders');
         const allOrders: DeliveryOrder[] = response.data.orders ?? response.data ?? [];
         const relevant = allOrders.filter(
@@ -94,7 +94,7 @@ export default function DelivererDashboard() {
   async function handleAccept(orderId: string) {
     try {
       await api.post(`/orders/${orderId}/assign`, { delivererId: user?._id ?? '' });
-      // Remove from the list
+      // Nous retirons la commande de la liste
       setOrders((prev) => prev.filter((o) => o._id !== orderId));
     } catch {
       setError("Impossible d'accepter cette livraison.");

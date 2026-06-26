@@ -21,7 +21,7 @@ export default function RegisterPage() {
   const [fieldErrors, setFieldErrors] = useState<FieldError>({});
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  // Validation rules
+  // Nous définissons ici les règles de validation des champs
   const validateEmail = (value: string): string => {
     if (!value) return 'L\'e-mail est requis';
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Format e-mail invalide';
@@ -64,7 +64,7 @@ export default function RegisterPage() {
     event.preventDefault();
     setError('');
 
-    // Validate all fields
+    // Nous validons l'ensemble des champs
     const newErrors: FieldError = {
       firstName: validateFirstName(firstName),
       lastName: validateLastName(lastName),
@@ -75,7 +75,7 @@ export default function RegisterPage() {
 
     setFieldErrors(newErrors);
 
-    // Check if there are any errors
+    // Nous vérifions la présence d'erreurs avant de poursuivre
     if (Object.values(newErrors).some(err => err)) {
       return;
     }

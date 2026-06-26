@@ -1,4 +1,4 @@
-// Machine à états des statuts de commande
+// Nous définissons ici la machine à états des statuts de commande
 const ORDER_STATUSES = {
   PENDING: 'PENDING',
   CONFIRMED: 'CONFIRMED',
@@ -10,7 +10,7 @@ const ORDER_STATUSES = {
   FAILED: 'FAILED',
 };
 
-// Transitions valides entre les statuts
+// Nous définissons ici les transitions valides entre les statuts
 const VALID_TRANSITIONS = {
   [ORDER_STATUSES.PENDING]: [
     ORDER_STATUSES.CONFIRMED,
@@ -35,16 +35,16 @@ const VALID_TRANSITIONS = {
     ORDER_STATUSES.DELIVERED,
     ORDER_STATUSES.FAILED,
   ],
-  [ORDER_STATUSES.DELIVERED]: [], // État final
-  [ORDER_STATUSES.CANCELLED]: [], // État final
-  [ORDER_STATUSES.FAILED]: [], // État final
+  [ORDER_STATUSES.DELIVERED]: [], // Nous considérons cet état comme final
+  [ORDER_STATUSES.CANCELLED]: [], // Nous considérons cet état comme final
+  [ORDER_STATUSES.FAILED]: [], // Nous considérons cet état comme final
 };
 
 /**
- * Valide si une transition de statut est autorisée
+ * Nous vérifions ici si une transition de statut est autorisée.
  * @param {string} currentStatus - Statut actuel de la commande
  * @param {string} newStatus - Nouveau statut demandé
- * @returns {boolean} - true si la transition est valide
+ * @returns {boolean} - true si nous jugeons la transition valide
  */
 function isValidTransition(currentStatus, newStatus) {
   if (!VALID_TRANSITIONS[currentStatus]) {
@@ -54,7 +54,7 @@ function isValidTransition(currentStatus, newStatus) {
 }
 
 /**
- * Valide si un statut existe
+ * Nous vérifions ici si un statut existe.
  * @param {string} status - Statut à valider
  * @returns {boolean} - true si le statut existe
  */
@@ -63,9 +63,9 @@ function isValidStatus(status) {
 }
 
 /**
- * Retourne les statuts possibles depuis un statut donné
+ * Nous retournons ici les statuts possibles depuis un statut donné.
  * @param {string} currentStatus - Statut actuel
- * @returns {string[]} - Liste des statuts possibles
+ * @returns {string[]} - Liste des statuts possibles que nous calculons
  */
 function getNextPossibleStatuses(currentStatus) {
   return VALID_TRANSITIONS[currentStatus] || [];

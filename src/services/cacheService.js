@@ -1,16 +1,16 @@
 const { getRedisClient, isRedisConnected } = require('../config/redis');
 const { logger } = require('../utils/logger');
 
-// TTL en secondes
+// Nous exprimons les durées de vie (TTL) en secondes
 const TTL = {
-  RESTAURANTS: 3600, // 1 heure
-  RESTAURANT_DETAIL: 3600, // 1 heure
-  ORDERS: 300, // 5 minutes
-  ORDER_DETAIL: 300, // 5 minutes
+  RESTAURANTS: 3600, // nous fixons cette durée à 1 heure
+  RESTAURANT_DETAIL: 3600, // nous fixons cette durée à 1 heure
+  ORDERS: 300, // nous fixons cette durée à 5 minutes
+  ORDER_DETAIL: 300, // nous fixons cette durée à 5 minutes
 };
 
 /**
- * Récupérer une valeur depuis le cache
+ * Nous récupérons une valeur depuis le cache.
  * @param {string} key - Clé du cache
  * @returns {Promise<any|null>} - Valeur cachée ou null
  */
@@ -38,7 +38,7 @@ async function get(key) {
 }
 
 /**
- * Stocker une valeur dans le cache
+ * Nous stockons une valeur dans le cache.
  * @param {string} key - Clé du cache
  * @param {any} value - Valeur à stocker
  * @param {number} ttl - Durée de vie en secondes
@@ -65,7 +65,7 @@ async function set(key, value, ttl = 3600) {
 }
 
 /**
- * Invalider le cache par pattern
+ * Nous invalidons le cache selon un pattern donné.
  * @param {string} pattern - Pattern de clés à invalider (ex: restaurants:*)
  * @returns {Promise<number>} - Nombre de clés invalidées
  */
@@ -94,7 +94,7 @@ async function invalidate(pattern) {
 }
 
 /**
- * Supprimer une clé spécifique du cache
+ * Nous supprimons une clé spécifique du cache.
  * @param {string} key - Clé à supprimer
  * @returns {Promise<boolean>} - true si succès
  */
@@ -118,7 +118,7 @@ async function del(key) {
 }
 
 /**
- * Générer une clé de cache pour les restaurants
+ * Nous générons une clé de cache pour les restaurants.
  * @param {string} district - District (optionnel)
  * @param {string} isOpen - Statut d'ouverture (optionnel)
  * @param {string} q - Recherche textuelle (optionnel)
@@ -137,7 +137,7 @@ function getRestaurantCacheKey(district = null, isOpen = null, q = null, page = 
 }
 
 /**
- * Générer une clé de cache pour un restaurant spécifique
+ * Nous générons une clé de cache pour un restaurant spécifique.
  * @param {string} restaurantId - ID du restaurant
  * @returns {string} - Clé de cache
  */
@@ -146,7 +146,7 @@ function getRestaurantDetailCacheKey(restaurantId) {
 }
 
 /**
- * Générer une clé de cache pour les commandes d'un utilisateur
+ * Nous générons une clé de cache pour les commandes d'un utilisateur.
  * @param {string} userId - ID de l'utilisateur
  * @param {string} status - Statut de commande (optionnel)
  * @returns {string} - Clé de cache
@@ -158,7 +158,7 @@ function getOrderCacheKey(userId, status = null) {
 }
 
 /**
- * Générer une clé de cache pour une commande spécifique
+ * Nous générons une clé de cache pour une commande spécifique.
  * @param {string} orderId - ID de la commande
  * @returns {string} - Clé de cache
  */
