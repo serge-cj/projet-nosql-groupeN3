@@ -24,7 +24,7 @@ async function connectDatabase() {
     });
 
     isConnected = true;
-    logger.info('✅ MongoDB connecté');
+    logger.info(' MongoDB connecté');
 
     mongoose.connection.on('disconnected', () => {
       logger.warn('MongoDB déconnecté');

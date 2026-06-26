@@ -20,7 +20,13 @@ export default function LoginPage() {
       const response = await api.post('/auth/login', { email, password });
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
-      router.push('/restaurants');
+
+      const dashboardByRole: Record<string, string> = {
+        VENDOR: '/restaurant/dashboard',
+        DELIVERER: '/deliverer/dashboard',
+        ADMIN: '/admin',
+      };
+      router.push(dashboardByRole[response.data.user.role] ?? '/restaurants');
     } catch (err: any) {
       setError(err.response?.data?.message ?? 'E-mail ou mot de passe incorrect');
     } finally {

@@ -41,13 +41,13 @@ const http = require('http');
     });
 
     server.listen(port, () => {
-      logger.info(`\n🚀 Serveur Libreville Eats démarré`);
-      logger.info(`📍 Port : ${port}`);
-      logger.info(`🌐 URL API : ${config.server.apiBaseUrl}`);
-      logger.info(`💾 MongoDB : ${config.mongodb.uri.replace(/:[^@]*@/, ':****@')}`);
-      logger.info(`⚙️  Environnement : ${config.server.nodeEnv}`);
-      logger.info(`🔌 WebSocket : Socket.io activé`);
-      logger.info(`\n✅ Le serveur accepte les requêtes\n`);
+      logger.info(`\n Serveur Libreville Eats démarré`);
+      logger.info(` Port : ${port}`);
+      logger.info(` URL API : ${config.server.apiBaseUrl}`);
+      logger.info(` MongoDB : ${config.mongodb.uri.replace(/:[^@]*@/, ':****@')}`);
+      logger.info(`  Environnement : ${config.server.nodeEnv}`);
+      logger.info(` WebSocket : Socket.io activé`);
+      logger.info(`\n Le serveur accepte les requêtes\n`);
     });
 
     process.on('SIGTERM', () => {

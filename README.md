@@ -4,7 +4,7 @@ Application de livraison de repas à domicile à Libreville, réalisée dans le 
 
 ## Membres du groupe
 
-- Serge CJ
+- MAVOUNGOU Serge Murlain
 - _(compléter avec les autres membres du groupe 3)_
 
 ## Contexte métier
@@ -85,7 +85,7 @@ tests/                     # Tests Jest + Supertest
 
 ```bash
 git clone https://github.com/votre-org/Libreville-Eats-Backend.git
-cd Libreville-Eats-Backend
+cd projet-nosql-groupeN3-Backend
 npm install
 cp .env.example .env   # puis éditer MONGODB_URI, JWT_SECRET
 ```
@@ -114,15 +114,15 @@ npm run seed:clean          # Vider les collections
 
 ## API (endpoints principaux)
 
-| Méthode | Route | Description |
-|---------|-------|-------------|
-| POST | `/api/auth/register` | Inscription |
-| POST | `/api/auth/login` | Connexion JWT |
-| GET | `/api/restaurants` | Liste des restaurants |
-| GET | `/api/restaurants/nearby` | Restaurants à proximité |
-| POST | `/api/orders` | Créer une commande |
-| GET | `/api/orders/:id` | Détail et suivi de commande |
-| GET | `/api/deliverers` | Liste des livreurs disponibles |
+| Méthode | Route                     | Description                    |
+| ------- | ------------------------- | ------------------------------ |
+| POST    | `/api/auth/register`      | Inscription                    |
+| POST    | `/api/auth/login`         | Connexion JWT                  |
+| GET     | `/api/restaurants`        | Liste des restaurants          |
+| GET     | `/api/restaurants/nearby` | Restaurants à proximité        |
+| POST    | `/api/orders`             | Créer une commande             |
+| GET     | `/api/orders/:id`         | Détail et suivi de commande    |
+| GET     | `/api/deliverers`         | Liste des livreurs disponibles |
 
 ---
 
