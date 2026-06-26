@@ -138,7 +138,7 @@ export default async function Home() {
                   className="animate-fade-in-up block text-[clamp(2.5rem,5vw+1rem,5.5rem)] font-medium leading-[0.96] text-white"
                   style={{ animationDelay: '100ms' }}
                 >
-                  Libreville a faim.
+                  Vous êtes occupés?
                 </span>
                 <span
                   className="animate-fade-in-up relative mt-1 inline-block text-[clamp(3.25rem,8vw+1rem,8.75rem)] font-semibold italic leading-[0.88] tracking-[-0.045em] text-mango-300"
