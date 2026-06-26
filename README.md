@@ -1,16 +1,62 @@
-# Libreville Eats — Backend API
+# Libreville Eats — Projet NoSQL (Groupe 3)
 
-API REST pour **Libreville Eats**, application de livraison de repas à domicile à Libreville (projet NoSQL — Master I, Groupe 3).
+Application de livraison de repas à domicile à Libreville, réalisée dans le cadre du module **Bases de données NoSQL** (Master I).
 
-Ce dépôt est centré sur le **backend** : l'API REST, la logique métier, la persistance MongoDB/Redis, et la validation/authentification.
+## Membres du groupe
 
-Le **frontend** Next.js est inclus comme un supplément de démonstration pour enrichir la présentation, mais le coeur du projet reste le backend.
+- Serge CJ
+- _(compléter avec les autres membres du groupe 3)_
+
+## Contexte métier
+
+Libreville Eats connecte trois types d'utilisateurs autour d'une commande : un **client** qui parcourt les restaurants et commande, un **restaurateur** qui gère son menu et confirme les commandes, et un **livreur** dont la position GPS est suivie en temps réel jusqu'à la livraison. Les contraintes locales (connectivité mobile variable, données gabonaises réalistes : quartiers de Libreville, plats, FCFA) ont guidé les choix de modélisation NoSQL — voir `conception/modele-donnees.md` pour le détail.
+
+Ce dépôt couvre l'intégralité du socle attendu pour le projet NoSQL (modélisation, scripts CRUD/requêtes/agrégations, indexation, analyse `explain()`, rapport) **et** va au-delà avec une implémentation complète : une API REST Node.js/Express/MongoDB/Redis fonctionnelle (le bonus `api/` du sujet) accompagnée d'un frontend Next.js de démonstration.
 
 Stack : **Node.js**, **Express**, **Mongoose**, **MongoDB**, **Redis** (cache), **JWT**.
 
 ---
 
-## Structure du projet
+## Prérequis
+
+- **Node.js** >= 18
+- **MongoDB** (local ou Atlas) — voir `MONGODB_URI` dans `.env.example`
+- **mongosh** (pour charger les scripts de `data/` et `scripts/`)
+- **Redis** (optionnel — l'API dégrade proprement sans cache si absent)
+
+## Instructions d'exécution (scripts NoSQL)
+
+```bash
+mongosh "$MONGODB_URI"
+load("data/seed.js")
+load("scripts/01-crud.js")
+load("scripts/02-requetes.js")
+load("scripts/03-agregations.js")
+load("scripts/04-index.js")
+```
+
+## Structure du dépôt (livrables NoSQL)
+
+```
+conception/
+├── modele-donnees.pdf      # Collections, schémas, relations, embedding vs referencing
+└── schema.png              # Schéma visuel du modèle de données
+data/
+└── seed.js                  # 30 restaurants réels + 30 clients/30 restaurateurs/30 livreurs (mdp en clair : TestPass123), insertMany() — mongosh pur
+scripts/
+├── 01-crud.js                # insertOne / insertMany / find / updateOne / updateMany / deleteOne
+├── 02-requetes.js            # $gt/$lt/$in, regex, sort, pagination (skip/limit)
+├── 03-agregations.js         # $match / $group / $sort / $lookup
+└── 04-index.js                # createIndex(), explain('executionStats')
+explain/
+└── explain-avant-apres.pdf  # Analyse COLLSCAN vs IXSCAN
+rapport/
+└── rapport.pdf               # Rapport final (8 sections)
+api/
+└── README.md                 # Pointe vers le bonus API REST réel : src/
+```
+
+Le reste du dépôt — l'application complète qui met ces choix NoSQL en pratique — est organisé ainsi :
 
 ```
 src/
@@ -92,7 +138,10 @@ Voir `.env.example` :
 
 ## Documentation de conception
 
-- `docs/design/PHASE1_NOSQL_MODELING.md` — modèle document MongoDB
+- `conception/modele-donnees.pdf` — livrable NoSQL : modèle document, embedding vs referencing
+- `explain/explain-avant-apres.pdf` — livrable NoSQL : COLLSCAN vs IXSCAN
+- `rapport/rapport.pdf` — livrable NoSQL : rapport final
+- `docs/design/PHASE1_NOSQL_MODELING.md` — version détaillée du modèle document MongoDB (application réelle)
 - `docs/design/PHASE1_REDIS_CACHING.md` — stratégie Redis
 - `scripts/demo/SOUTENANCE_MONGOSH.md` — guide démo mongosh
 

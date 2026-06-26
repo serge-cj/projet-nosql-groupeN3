@@ -10,9 +10,13 @@ import { RestaurantCardSkeleton } from '../components/Skeleton';
 import StarRating from '../components/StarRating';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-const DISTRICTS = ['Nombakélé', 'Batavéa', 'Deïdate', 'Gué-Gué', 'Okala', 'Nkembo', 'Akébé', 'Lalala', 'PK5', 'Santa-Marija'];
+const DISTRICTS = [
+  'Nombakélé', 'Batavéa', 'Deïdate', 'Gué-Gué', 'Okala', 'Nkembo', 'Akébé', 'Lalala', 'PK5', 'Santa-Marija',
+  'Nzeng Ayong', 'Owendo', 'Akanda', '3 Quartiers', 'Glass', 'Baie des Rois', 'Batterie IV', 'Carrefour JDO',
+  'Centre-ville', 'Aéroport', 'Montagne Sainte', 'Louis',
+];
 const CUISINES = ['Gabonais', 'Fast-food', 'Italien', 'Asiatique'];
-const NEIGHBORHOODS = ['PK5', 'Santa-Marija', 'Nombakélé'];
+const NEIGHBORHOODS = ['PK5', 'Santa-Marija', 'Nombakélé', 'Glass', 'Owendo'];
 const PAGE_LIMIT = 9;
 
 interface Restaurant {
