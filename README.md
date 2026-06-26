@@ -4,8 +4,9 @@ Application de livraison de repas à domicile à Libreville, réalisée dans le 
 
 ## Membres du groupe
 
+- BOUKINDA MAMBOUNDOU Jude
 - MAVOUNGOU Serge Murlain
-- _(compléter avec les autres membres du groupe 3)_
+- BENOME NTOUTOUME Élise Josita
 
 ## Contexte métier
 
@@ -44,8 +45,8 @@ conception/
 data/
 └── seed.js                  # 30 restaurants réels + 30 clients/30 restaurateurs/30 livreurs (mdp en clair : TestPass123), insertMany() — mongosh pur
 scripts/
-├── 01-crud.js                # insertOne / insertMany / find / updateOne / updateMany / deleteOne
-├── 02-requetes.js            # $gt/$lt/$in, regex, sort, pagination (skip/limit)
+├── 01-crud.js                # insertOne/insertMany/find/updateOne/updateMany/deleteOne/deleteMany, $set/$inc/$push/$pull
+├── 02-requetes.js            # $gt/$lt/$in, regex, sort, pagination (skip/limit), countDocuments
 ├── 03-agregations.js         # $match / $group / $sort / $lookup
 └── 04-index.js                # createIndex(), explain('executionStats')
 explain/
@@ -77,6 +78,11 @@ scripts/
 
 docs/design/               # Conception NoSQL + Redis
 tests/                     # Tests Jest + Supertest
+
+frontend/                  # Frontend Next.js 14 (démonstration de l'API)
+├── app/                   # App Router (restaurants, dashboards client/restaurateur/livreur, auth, admin)
+├── lib/                   # Client API (axios), gestion du panier
+└── tokens.css             # Design system (tokens CSS)
 ```
 
 ---
@@ -110,6 +116,15 @@ npm run aggregate:all       # Tous les pipelines d'agrégation
 npm run seed:clean          # Vider les collections
 ```
 
+### Frontend (démonstration)
+
+```bash
+cd frontend
+npm install
+echo "NEXT_PUBLIC_API_URL=http://localhost:5000/api" > .env.local
+npm run dev                        # http://localhost:3000
+```
+
 ---
 
 ## API (endpoints principaux)
@@ -136,6 +151,10 @@ Voir `.env.example` :
 
 ---
 
+## Jeu de tests API (bonus)
+
+`.thunder-client/` — collection **Thunder Client** (extension VS Code) couvrant les 26 endpoints de l'API (auth, restaurants, menus/plats, commandes, utilisateurs, livreurs), avec un environnement préconfiguré et la documentation requête/réponse de chaque route. Voir `.thunder-client/README.md` pour l'import et le scénario de bout en bout.
+
 ## Documentation de conception
 
 - `conception/modele-donnees.pdf` — livrable NoSQL : modèle document, embedding vs referencing
@@ -148,3 +167,4 @@ Voir `.env.example` :
 ---
 
 Projet réalisé dans le cadre du module **Bases de données NoSQL** — **Libreville Eats** (Groupe 3).
+# projet-nosql-groupeN3
