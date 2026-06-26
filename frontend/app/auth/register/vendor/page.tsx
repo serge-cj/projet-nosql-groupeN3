@@ -226,6 +226,18 @@ export default function VendorRegisterPage() {
                   <option value="Lalala">Lalala</option>
                   <option value="PK5">PK5</option>
                   <option value="Santa-Marija">Santa-Marija</option>
+                  <option value="Nzeng Ayong">Nzeng Ayong</option>
+                  <option value="Owendo">Owendo</option>
+                  <option value="Akanda">Akanda</option>
+                  <option value="3 Quartiers">3 Quartiers</option>
+                  <option value="Glass">Glass</option>
+                  <option value="Baie des Rois">Baie des Rois</option>
+                  <option value="Batterie IV">Batterie IV</option>
+                  <option value="Carrefour JDO">Carrefour JDO</option>
+                  <option value="Centre-ville">Centre-ville</option>
+                  <option value="Aéroport">Aéroport</option>
+                  <option value="Montagne Sainte">Montagne Sainte</option>
+                  <option value="Louis">Louis</option>
                 </select>
                 {fieldErrors.restaurantDistrict ? (
                   <p className="mt-1 text-sm text-error">{fieldErrors.restaurantDistrict}</p>
