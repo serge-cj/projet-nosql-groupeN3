@@ -1,22 +1,22 @@
 // data/seed.js
-// Données de test réalistes (30 vraies enseignes de Libreville/Akanda/Owendo,
+// Nous fournissons ici des données de test réalistes (30 vraies enseignes de Libreville/Akanda/Owendo,
 // 30 clients, 30 restaurateurs, 30 livreurs — tous avec des noms gabonais)
 // pour le projet Libreville Eats.
-// Script mongosh autonome — aucune dépendance Node.js / Mongoose.
+// Nous exécutons ce script de manière autonome avec mongosh — aucune dépendance Node.js / Mongoose.
 //
 // Usage :
 //   mongosh "mongodb://localhost:27017/libreville_eats"
 //   load("data/seed.js")
 //
-// Référence : ce fichier est la transcription mongosh pure du jeu de
+// Référence : nous transcrivons ici en mongosh pur le jeu de
 // données réel utilisé par l'application (scripts/data/gabon-data.js ->
 // REAL_RESTAURANTS, inséré via scripts/seed/index.js / npm run seed).
 //
-// Mot de passe en clair pour TOUS les comptes (clients, restaurateurs,
-// livreurs) : TestPass123 — laissé en clair ici (insertMany mongosh pur,
-// pas de hook de hachage bcrypt) pour pouvoir présenter et identifier
-// facilement les comptes. Pour se connecter via l'application réelle
-// (qui exige un hash bcrypt), utiliser plutôt "npm run seed".
+// Nous laissons le mot de passe en clair pour TOUS les comptes (clients, restaurateurs,
+// livreurs) : TestPass123 — volontairement non haché ici (insertMany mongosh pur,
+// pas de hook de hachage bcrypt) afin de pouvoir présenter et identifier
+// facilement les comptes. Pour nous connecter via l'application réelle
+// (qui exige un hash bcrypt), nous utilisons plutôt "npm run seed".
 
 const CLEAR_PASSWORD = 'TestPass123';
 
@@ -25,7 +25,7 @@ db.restaurants.drop();
 db.deliverers.drop();
 db.commandes.drop();
 
-// ============ Données de référence (contexte gabonais) ============
+// ============ Nous définissons ici les données de référence (contexte gabonais) ============
 const FIRST_NAMES = ["Ahmed","Jean","Marie","Pierre","Josiane","Alphonse","Sylvie","Rodrigue","Yvette","Laurent","Carole","Bernard","Nicole","Dominique","Chantal","Samuel","Beatrice","Michel","Isabelle","Pascal"];
 const LAST_NAMES = ["Makanda","N'Sabi","Bongo","Mba","Nguema","Fang","Angoué","Akendengué","Oyono","Ndoumou","Kouma","Kombila","Bemba","Meye","Awoume","Ngadi","Tonda","Keming","Ondo","Sanda"];
 const DISTRICTS = ["Nombakélé","Batavéa","Deïdate","Gué-Gué","Okala","Nkembo","Akébé","Lalala","PK5","Santa-Marija","Nzeng Ayong","Owendo","Akanda","3 Quartiers","Glass","Baie des Rois","Batterie IV","Carrefour JDO","Centre-ville","Aéroport","Montagne Sainte","Louis"];
@@ -128,7 +128,29 @@ const gabonName = (index) => ({
 const randomChoice = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-// 30 vraies enseignes de Libreville/Akanda/Owendo, avec leurs menus réels
+// Nous construisons l'adresse "nomprenom@librevilleeats.ga" sans accents/espaces, en gérant les doublons
+// (les noms se répètent au-delà de 20 livreurs car FIRST_NAMES/LAST_NAMES
+// n'ont que 20 entrées chacun) à l'aide d'un suffixe numérique sur les collisions.
+const usedDelivererEmails = new Set();
+const delivererEmail = (firstName, lastName) => {
+  const base = `${firstName}${lastName}`
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]/g, '');
+
+  let local = base;
+  let suffix = 2;
+  while (usedDelivererEmails.has(local)) {
+    local = `${base}${suffix}`;
+    suffix += 1;
+  }
+  usedDelivererEmails.add(local);
+
+  return `${local}@librevilleeats.ga`;
+};
+
+// Nous listons ici 30 vraies enseignes de Libreville/Akanda/Owendo, avec leurs menus réels
 // (même contenu que scripts/data/gabon-data.js -> REAL_RESTAURANTS).
 const REAL_RESTAURANTS = [
   {
@@ -2944,7 +2966,7 @@ const REAL_RESTAURANTS = [
   }
 ];
 
-// ============ users : 30 clients ============
+// ============ users : nous créons 30 clients ============
 const customerIds = [];
 const customers = [];
 for (let i = 0; i < 30; i++) {
@@ -2972,7 +2994,7 @@ for (let i = 0; i < 30; i++) {
 }
 db.users.insertMany(customers);
 
-// ============ users : 30 restaurateurs (1 par restaurant réel) ============
+// ============ users : nous créons 30 restaurateurs (1 par restaurant réel) ============
 const vendorIds = [];
 const vendors = [];
 for (let i = 0; i < REAL_RESTAURANTS.length; i++) {
@@ -2998,7 +3020,7 @@ for (let i = 0; i < REAL_RESTAURANTS.length; i++) {
 }
 db.users.insertMany(vendors);
 
-// ============ users : 30 livreurs ============
+// ============ users : nous créons 30 livreurs ============
 const delivererUserIds = [];
 const delivererUsers = [];
 for (let i = 0; i < 30; i++) {
@@ -3007,7 +3029,7 @@ for (let i = 0; i < 30; i++) {
   const { firstName, lastName } = gabonName(i + 60);
   delivererUsers.push({
     _id: id,
-    email: `deliverer${i + 1}@librevilleeats.ga`,
+    email: delivererEmail(firstName, lastName),
     password: CLEAR_PASSWORD,
     role: 'DELIVERER',
     profile: { firstName, lastName, phone: `+241${randomChoice(['06', '07'])}${randomInt(1000000, 9999999)}` },
@@ -3018,7 +3040,7 @@ for (let i = 0; i < 30; i++) {
 }
 db.users.insertMany(delivererUsers);
 
-// ============ restaurants : 30 enseignes réelles avec menus réels ============
+// ============ restaurants : nous créons 30 enseignes réelles avec menus réels ============
 const restaurantIds = [];
 const restaurants = REAL_RESTAURANTS.map((r, i) => {
   const id = ObjectId();
@@ -3035,7 +3057,7 @@ const restaurants = REAL_RESTAURANTS.map((r, i) => {
       coordinates: { type: 'Point', coordinates: r.coordinates },
     },
     hours: r.hours,
-    // 18 restaurants sur 30 fermés (variété pour la démo des filtres
+    // Nous fermons 18 restaurants sur 30 (variété pour la démo des filtres
     // isOpen) — répartis sur chaque tranche de 10 plutôt que regroupés
     // par enseigne.
     isOpen: (i % 10) >= 6,
@@ -3045,9 +3067,9 @@ const restaurants = REAL_RESTAURANTS.map((r, i) => {
       {
         name: 'Menu',
         description: r.hoursText,
-        // 10 à 15% des plats de CHAQUE restaurant en rupture de stock —
+        // Nous mettons 10 à 15% des plats de CHAQUE restaurant en rupture de stock —
         // avec 10 plats par restaurant, 1 plat (10%) tombe dans cette
-        // fourchette ; l'indice varie par restaurant (i) pour ne pas
+        // fourchette ; nous faisons varier l'indice par restaurant (i) pour ne pas
         // toujours désactiver le même plat.
         dishes: (() => {
           const outOfStockCount = Math.max(1, Math.round(r.dishes.length * 0.12));
@@ -3075,7 +3097,7 @@ const restaurants = REAL_RESTAURANTS.map((r, i) => {
 });
 db.restaurants.insertMany(restaurants);
 
-// ============ deliverers : 30 profils livreurs ============
+// ============ deliverers : nous créons 30 profils livreurs ============
 const delivererIds = [];
 const deliverers = [];
 const vehicleTypes = ['MOTORCYCLE', 'SCOOTER', 'BICYCLE'];
@@ -3103,7 +3125,7 @@ for (let i = 0; i < 30; i++) {
 }
 db.deliverers.insertMany(deliverers);
 
-// ============ commandes : 1 commande par restaurant (30) ============
+// ============ commandes : nous créons 1 commande par restaurant (30) ============
 const STATUSES = ['PENDING', 'CONFIRMED', 'PREPARING', 'DELIVERY_IN_PROGRESS', 'DELIVERED', 'CANCELLED'];
 const commandes = REAL_RESTAURANTS.map((r, i) => {
   const status = STATUSES[i % STATUSES.length];

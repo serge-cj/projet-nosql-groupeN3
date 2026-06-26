@@ -6,7 +6,7 @@ const { getRedisClient, isRedisConnected } = require('../config/redis');
 let io = null;
 
 /**
- * Initialiser le serveur Socket.io
+ * Nous initialisons le serveur Socket.io.
  * @param {Object} httpServer - Serveur HTTP Express
  * @returns {Object} - Instance Socket.io
  */
@@ -21,7 +21,7 @@ function initializeSocket(httpServer) {
     pingInterval: 25000,
   });
 
-  // Utiliser Redis adapter si disponible pour scaling horizontal
+  // Nous utilisons l'adaptateur Redis lorsqu'il est disponible afin de permettre la mise à l'échelle horizontale
   if (isRedisConnected()) {
     const redisClient = getRedisClient();
     const pubClient = redisClient.duplicate();
@@ -31,7 +31,7 @@ function initializeSocket(httpServer) {
     logger.info('Socket.io Redis adapter configuré');
   }
 
-  // Middleware d'authentification Socket.io
+  // Nous définissons ici le middleware d'authentification Socket.io
   io.use(async (socket, next) => {
     try {
       const token = socket.handshake.auth.token;
@@ -50,31 +50,31 @@ function initializeSocket(httpServer) {
     }
   });
 
-  // Gestion des connexions
+  // Nous gérons ici les connexions entrantes
   io.on('connection', (socket) => {
     logger.info('Client Socket.io connecté', { socketId: socket.id, userId: socket.userId });
 
-    // Rejoindre la room de l'utilisateur
+    // Nous faisons rejoindre la room de l'utilisateur
     socket.join(`user:${socket.userId}`);
 
-    // Événement : rejoindre une room de commande
+    // Nous traitons l'événement de rejointe d'une room de commande
     socket.on('join:order', (orderId) => {
       socket.join(`order:${orderId}`);
       logger.info('Client rejoint room commande', { socketId: socket.id, orderId });
     });
 
-    // Événement : quitter une room de commande
+    // Nous traitons l'événement de sortie d'une room de commande
     socket.on('leave:order', (orderId) => {
       socket.leave(`order:${orderId}`);
       logger.info('Client quitte room commande', { socketId: socket.id, orderId });
     });
 
-    // Événement : mise à jour de position GPS (livreur)
+    // Nous traitons l'événement de mise à jour de la position GPS du livreur
     socket.on('location:update', (data) => {
       const { orderId, lat, lng } = data;
       logger.debug('Position GPS mise à jour', { socketId: socket.id, orderId, lat, lng });
 
-      // Émettre la position aux clients de la room commande
+      // Nous émettons la position aux clients présents dans la room de la commande
       io.to(`order:${orderId}`).emit('location:updated', {
         orderId,
         lat,
@@ -83,12 +83,12 @@ function initializeSocket(httpServer) {
       });
     });
 
-    // Événement : mise à jour de statut de commande
+    // Nous traitons l'événement de mise à jour du statut de commande
     socket.on('order:status:update', (data) => {
       const { orderId, status } = data;
       logger.debug('Statut commande mis à jour', { socketId: socket.id, orderId, status });
 
-      // Émettre le nouveau statut aux clients de la room commande
+      // Nous émettons le nouveau statut aux clients présents dans la room de la commande
       io.to(`order:${orderId}`).emit('order:status:updated', {
         orderId,
         status,
@@ -96,7 +96,7 @@ function initializeSocket(httpServer) {
       });
     });
 
-    // Déconnexion
+    // Nous traitons l'événement de déconnexion
     socket.on('disconnect', () => {
       logger.info('Client Socket.io déconnecté', { socketId: socket.id, userId: socket.userId });
     });
@@ -107,7 +107,7 @@ function initializeSocket(httpServer) {
 }
 
 /**
- * Envoyer un événement à une room spécifique
+ * Nous envoyons un événement à une room spécifique.
  * @param {string} room - Nom de la room
  * @param {string} event - Nom de l'événement
  * @param {Object} data - Données à envoyer
@@ -125,7 +125,7 @@ function emitToRoom(room, event, data) {
 }
 
 /**
- * Envoyer un événement à un utilisateur spécifique
+ * Nous envoyons un événement à un utilisateur spécifique.
  * @param {string} userId - ID de l'utilisateur
  * @param {string} event - Nom de l'événement
  * @param {Object} data - Données à envoyer
@@ -143,7 +143,7 @@ function emitToUser(userId, event, data) {
 }
 
 /**
- * Obtenir l'instance Socket.io
+ * Nous récupérons l'instance Socket.io.
  * @returns {Object|null} - Instance Socket.io ou null
  */
 function getIO() {

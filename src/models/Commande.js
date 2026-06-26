@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// Machine à états des statuts de commande
+// Nous définissons ici la machine à états des statuts de commande
 const ORDER_STATUSES = {
   PENDING: 'PENDING',
   CONFIRMED: 'CONFIRMED',
@@ -14,7 +14,7 @@ const ORDER_STATUSES = {
 
 const commandeSchema = new mongoose.Schema(
   {
-    // Références
+    // Nous référençons ici les entités liées à la commande
     customer_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -33,7 +33,7 @@ const commandeSchema = new mongoose.Schema(
       default: null,
     },
 
-    // Articles commandés (snapshot figé)
+    // Nous conservons ici les articles commandés sous forme de snapshot figé
     items: [
       {
         dishId: mongoose.Schema.Types.ObjectId,
@@ -58,7 +58,7 @@ const commandeSchema = new mongoose.Schema(
       },
     ],
 
-    // Détail des prix
+    // Nous détaillons ici les éléments de prix
     pricing: {
       subtotal: {
         type: Number,
@@ -86,14 +86,14 @@ const commandeSchema = new mongoose.Schema(
       },
     },
 
-    // Statut et machine à états
+    // Nous stockons ici le statut courant de la machine à états
     status: {
       type: String,
       enum: Object.values(ORDER_STATUSES),
       default: ORDER_STATUSES.PENDING,
     },
 
-    // Historique des transitions de statut
+    // Nous conservons ici l'historique des transitions de statut
     statusHistory: [
       {
         status: {
@@ -108,7 +108,7 @@ const commandeSchema = new mongoose.Schema(
       },
     ],
 
-    // Suivi GPS du livreur (série temporelle)
+    // Nous modélisons ici le suivi GPS du livreur sous forme de série temporelle
     deliveryTracking: [
       {
         timestamp: Date,
@@ -118,14 +118,14 @@ const commandeSchema = new mongoose.Schema(
             enum: ['Point'],
             default: 'Point',
           },
-          coordinates: [Number], // [longitude, latitude]
+          coordinates: [Number], // nous stockons les coordonnées au format [longitude, latitude]
         },
-        speed: Number, // km/h
-        distance: Number, // km depuis le restaurant
+        speed: Number, // nous exprimons cette vitesse en km/h
+        distance: Number, // nous exprimons cette distance en km depuis le restaurant
       },
     ],
 
-    // Informations de livraison
+    // Nous regroupons ici les informations de livraison
     deliveryInfo: {
       type: {
         type: String,
@@ -147,7 +147,7 @@ const commandeSchema = new mongoose.Schema(
       actualDeliveryTime: Date,
     },
 
-    // Paiement
+    // Nous regroupons ici les informations de paiement
     payment: {
       method: {
         type: String,
@@ -174,24 +174,24 @@ const commandeSchema = new mongoose.Schema(
         type: Date,
         default: Date.now,
       },
-      estimatedPreparationTime: Number, // minutes
+      estimatedPreparationTime: Number, // nous exprimons cette durée en minutes
       actualPreparationTime: Number,
     },
   },
   { timestamps: true }
 );
 
-// Index pour les requêtes fréquentes
-// Index composé : commandes actives par restaurant
+// Nous créons ici les index nécessaires aux requêtes fréquentes
+// Nous créons un index composé afin de retrouver les commandes actives par restaurant
 commandeSchema.index({ status: 1, restaurant_id: 1 });
 
-// Index composé : historique client trié par date
+// Nous créons un index composé afin de trier l'historique client par date
 commandeSchema.index({ customer_id: 1, createdAt: -1 });
 
-// Index : livraisons actives d'un livreur
+// Nous créons un index afin de retrouver les livraisons actives d'un livreur
 commandeSchema.index({ deliverer_id: 1, status: 1 });
 
-// Index géospatial sur le tracé GPS
+// Nous créons un index géospatial sur le tracé GPS
 commandeSchema.index({ 'deliveryTracking.coordinates': '2dsphere' });
 
 module.exports = mongoose.model('Commande', commandeSchema);

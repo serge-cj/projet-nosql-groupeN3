@@ -15,7 +15,7 @@ const dishSchema = z.object({
   isAvailable: z.boolean().default(true),
   quantity: z.number().int().min(0).default(0),
   image: z.string().url().optional(),
-  preparationTime: z.number().int().min(5).default(15), // minutes
+  preparationTime: z.number().int().min(5).default(15), // nous exprimons cette durée en minutes
 });
 
 const menuSchema = z.object({

@@ -8,7 +8,7 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Attach JWT token from localStorage to every request
+// Nous attachons le jeton JWT stocké dans localStorage à chaque requête
 api.interceptors.request.use(
   (config) => {
     if (typeof window !== 'undefined') {
@@ -22,7 +22,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Handle 401 responses: redirect to login
+// Nous gérons les réponses 401 en redirigeant vers la page de connexion
 api.interceptors.response.use(
   (response) => response,
   (error) => {

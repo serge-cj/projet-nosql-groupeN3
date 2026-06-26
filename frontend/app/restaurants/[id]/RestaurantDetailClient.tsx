@@ -204,7 +204,7 @@ export default function RestaurantDetailClient({ params }: Props) {
                       {restaurant.address?.district || 'Libreville'}
                     </span>
                     <span className="rounded-pill border border-divider bg-surface-1 px-3 py-1 text-xs font-semibold text-ink">
-                      {restaurant.rating ? `${restaurant.rating.toFixed(1)} ★` : 'Nouveau'}
+                      {restaurant.rating ? `${restaurant.rating.toFixed(1)}` : 'Nouveau'}
                     </span>
                   </div>
 

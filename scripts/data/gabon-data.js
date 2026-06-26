@@ -1,4 +1,4 @@
-// Libreville Districts & Neighborhoods
+// Nous listons ici les quartiers et districts de Libreville
 const DISTRICTS = {
   NOMBREKELE: 'Nombakélé',
   BATAEVA: 'Batavéa',
@@ -10,7 +10,7 @@ const DISTRICTS = {
   LALALA: 'Lalala',
   PK5: 'PK5',
   SANTA_MARIJA: 'Santa-Marija',
-  // Quartiers réels supplémentaires couverts par REAL_RESTAURANTS
+  // Nous ajoutons ici les quartiers réels supplémentaires couverts par REAL_RESTAURANTS
   NZENG_AYONG: 'Nzeng Ayong',
   OWENDO: 'Owendo',
   AKANDA: 'Akanda',
@@ -25,7 +25,7 @@ const DISTRICTS = {
   LOUIS: 'Louis',
 };
 
-// Gabon-specific dishes
+// Nous définissons ici les plats spécifiques au Gabon
 const GABON_DISHES = [
   {
     name: 'Poulet Nyembwe',
@@ -123,10 +123,10 @@ const GABON_DISHES = [
   },
 ];
 
-// Gabon phone numbers (+241)
+// Nous générons des numéros de téléphone gabonais (+241)
 const PHONE_GENERATORS = {
   generatePhone: () => {
-    const operators = ['06', '07']; // Gabon operators
+    const operators = ['06', '07']; // Opérateurs gabonais que nous utilisons
     const operator = operators[Math.floor(Math.random() * operators.length)];
     const rest = Math.floor(Math.random() * 100000000)
       .toString()
@@ -135,7 +135,7 @@ const PHONE_GENERATORS = {
   },
 };
 
-// Restaurant names (Gabon-local)
+// Nous définissons des noms de restaurants locaux gabonais
 const RESTAURANT_NAMES = [
   'Chez Albert - Libreville',
   'Le Petit Gabon',
@@ -149,14 +149,14 @@ const RESTAURANT_NAMES = [
   'La Maison du Poulet',
 ];
 
-// Cover photos for restaurant cards/headers (cycled by index)
+// Nous fournissons des photos de couverture pour les cartes/en-têtes de restaurant (cyclées par indice)
 const RESTAURANT_IMAGES = [
   'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=1200&q=80',
   'https://images.unsplash.com/photo-1543007631-283050bb3e8c?w=1200&q=80',
   'https://images.unsplash.com/photo-1481833761820-0509d3217039?w=1200&q=80',
 ];
 
-// Delivery zones with fees (in FCFA)
+// Nous définissons les zones de livraison avec leurs frais (en FCFA)
 const DELIVERY_ZONES = [
   { zone: 'Nombakélé', deliveryFee: 1000, deliveryTime: 25 },
   { zone: 'Batavéa', deliveryFee: 1500, deliveryTime: 35 },
@@ -170,7 +170,7 @@ const DELIVERY_ZONES = [
   { zone: 'Santa-Marija', deliveryFee: 1400, deliveryTime: 30 },
 ];
 
-// Operating hours (typical for Gabon)
+// Nous définissons des horaires d'ouverture typiques pour le Gabon
 const OPERATING_HOURS = {
   monday: { open: '11:00', close: '23:00' },
   tuesday: { open: '11:00', close: '23:00' },
@@ -181,7 +181,7 @@ const OPERATING_HOURS = {
   sunday: { open: '10:00', close: '23:00' },
 };
 
-// Libreville coordinates (approximate by district)
+// Nous fournissons les coordonnées de Libreville (approximatives, par quartier)
 const DISTRICT_COORDINATES = {
   'Nombakélé': [9.4583, 0.4162],
   'Batavéa': [9.4640, 0.4200],
@@ -207,7 +207,7 @@ const DISTRICT_COORDINATES = {
   'Louis': [9.4400, 0.4500],
 };
 
-// First names (Gabon-local)
+// Nous listons des prénoms locaux gabonais
 const FIRST_NAMES = [
   'Ahmed',
   'Jean',
@@ -231,7 +231,7 @@ const FIRST_NAMES = [
   'Pascal',
 ];
 
-// Last names (Gabon-local)
+// Nous listons des noms de famille locaux gabonais
 const LAST_NAMES = [
   'Makanda',
   'N\'Sabi',
@@ -255,8 +255,8 @@ const LAST_NAMES = [
   'Sanda',
 ];
 
-// Données réelles de restaurants de Libreville/Akanda/Owendo (30 enseignes)
-// Utilisé par scripts/seed/index.js pour peupler la base avec des restaurants
+// Nous fournissons ici des données réelles de restaurants de Libreville/Akanda/Owendo (30 enseignes).
+// Nous les utilisons dans scripts/seed/index.js pour peupler la base avec des restaurants
 // et plats réels (au lieu de noms/plats génériques tirés au hasard).
 const REAL_RESTAURANTS = [
   {

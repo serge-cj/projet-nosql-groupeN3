@@ -1,16 +1,16 @@
 // scripts/03-agregations.js
-// Pipelines d'agrégation — $match, $group, $sort, $lookup.
-// Repris (et simplifiés pour mongosh pur) des pipelines réellement utilisés
+// Nous présentons ici des pipelines d'agrégation — $match, $group, $sort, $lookup.
+// Nous les reprenons (en les simplifiant pour mongosh pur) des pipelines réellement utilisés
 // par l'application : scripts/aggregations/*.js (exécutés via Mongoose dans
-// l'app Node.js, ici réécrits en db.collection.aggregate() direct).
+// l'app Node.js, que nous réécrivons ici en db.collection.aggregate() direct).
 //
-// Script mongosh autonome. Usage :
+// Nous exécutons ce script de manière autonome avec mongosh. Usage :
 //   load("data/seed.js")
 //   load("scripts/03-agregations.js")
 
 print('\n=== 03-agregations.js ===\n');
 
-// ---------- Pipeline 1 : statistiques de commandes par restaurant ----------
+// ---------- Pipeline 1 : nous calculons les statistiques de commandes par restaurant ----------
 print('--- Statistiques de commandes par restaurant ---');
 db.commandes
   .aggregate([
@@ -43,7 +43,7 @@ db.commandes
   ])
   .forEach(printjson);
 
-// ---------- Pipeline 2 : performance des livreurs ----------
+// ---------- Pipeline 2 : nous évaluons la performance des livreurs ----------
 print('\n--- Performance des livreurs ---');
 db.commandes
   .aggregate([
@@ -77,7 +77,7 @@ db.commandes
   ])
   .forEach(printjson);
 
-// ---------- Pipeline 3 : analyse des revenus (par mois / restaurant / moyen de paiement) ----------
+// ---------- Pipeline 3 : nous analysons les revenus (par mois / restaurant / moyen de paiement) ----------
 print('\n--- Analyse des revenus : par moyen de paiement ---');
 db.commandes
   .aggregate([

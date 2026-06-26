@@ -63,7 +63,7 @@ export default function SettingsPage() {
             </label>
           </div>
 
-          {/* Account */}
+          {/* Nous affichons ici les liens relatifs au compte */}
           <div className="surface-card p-6">
             <h2 className="mb-4 font-semibold text-ink">Compte</h2>
             <div className="space-y-2">
@@ -82,7 +82,7 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Danger zone */}
+          {/* Nous regroupons ici les actions sensibles liées à la déconnexion */}
           <div className="surface-card border-error/20 p-6">
             <h2 className="mb-4 font-semibold text-error">Déconnexion</h2>
             <p className="mb-4 text-sm text-ink-muted">Vous déconnecter de votre compte sur cet appareil.</p>

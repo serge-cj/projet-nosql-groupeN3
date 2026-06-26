@@ -7,10 +7,10 @@ const { isValidTransition } = require('../utils/orderStateMachine');
 const cacheService = require('../services/cacheService');
 const { emitToRoom, emitToUser } = require('../socket');
 
-// Décrémente le stock des plats commandés ($inc) et bascule isAvailable à false
+// Nous décrémentons le stock des plats commandés ($inc) et basculons isAvailable à false
 // via $set lorsque le stock atteint zéro (gestion des ruptures par plat).
-// En cas d'échec sur un article (stock insuffisant), les décréments déjà
-// appliqués sont restaurés (compensation, faute de transaction multi-documents).
+// En cas d'échec sur un article (stock insuffisant), nous restaurons les décréments déjà
+// appliqués (compensation, faute de transaction multi-documents).
 async function decrementDishStock(restaurantId, items) {
   const decremented = [];
 
@@ -35,7 +35,7 @@ async function decrementDishStock(restaurantId, items) {
     );
 
     if (!updated) {
-      // Restaurer les décréments déjà effectués pour cette commande
+      // Nous restaurons les décréments déjà effectués pour cette commande
       for (const done of decremented) {
         await Restaurant.updateOne(
           { _id: restaurantId },
@@ -120,7 +120,7 @@ async function createOrder(req, res, next) {
 
     await order.save();
 
-    // Invalider le cache des commandes de l'utilisateur
+    // Nous invalidons le cache des commandes de l'utilisateur
     await cacheService.invalidate(`orders:user:${userId}*`);
     logger.debug('Cache invalidé pour createOrder', { userId });
 
@@ -134,11 +134,11 @@ async function createOrder(req, res, next) {
 async function getOrder(req, res, next) {
   try {
     const { id } = req.params;
-    
-    // Générer la clé de cache
+
+    // Nous générons la clé de cache
     const cacheKey = cacheService.getOrderDetailCacheKey(id);
 
-    // Essayer de récupérer depuis le cache
+    // Nous tentons de récupérer la valeur depuis le cache
     const cached = await cacheService.get(cacheKey);
     if (cached) {
       logger.debug('Cache hit pour getOrder', { cacheKey });
@@ -160,7 +160,7 @@ async function getOrder(req, res, next) {
 
     const response = { order };
 
-    // Stocker dans le cache (5 minutes)
+    // Nous stockons la réponse dans le cache (5 minutes)
     await cacheService.set(cacheKey, response, cacheService.TTL.ORDER_DETAIL);
     logger.debug('Cache set pour getOrder', { cacheKey });
 
@@ -183,10 +183,10 @@ async function listOrders(req, res, next) {
     const limitNum = parseInt(limit, 10);
     const skip = (pageNum - 1) * limitNum;
 
-    // Générer la clé de cache
+    // Nous générons la clé de cache
     const cacheKey = cacheService.getOrderCacheKey(req.user.id, status);
 
-    // Essayer de récupérer depuis le cache
+    // Nous tentons de récupérer la valeur depuis le cache
     const cached = await cacheService.get(cacheKey);
     if (cached) {
       logger.debug('Cache hit pour listOrders', { cacheKey });
@@ -219,7 +219,7 @@ async function listOrders(req, res, next) {
       },
     };
 
-    // Stocker dans le cache (5 minutes)
+    // Nous stockons la réponse dans le cache (5 minutes)
     await cacheService.set(cacheKey, response, cacheService.TTL.ORDERS);
     logger.debug('Cache set pour listOrders', { cacheKey });
 
@@ -240,7 +240,7 @@ async function updateOrderStatus(req, res, next) {
       return next(AppError.notFound('Commande introuvable', { id }));
     }
 
-    // Vérifier que l'utilisateur a le droit de modifier le statut
+    // Nous vérifions que l'utilisateur a le droit de modifier le statut
     let restaurantOwnerId = null;
     if (req.user.role === 'VENDOR' || req.user.role === 'ADMIN') {
       const restaurant = await Restaurant.findById(order.restaurant_id).select('owner_id');
@@ -255,7 +255,7 @@ async function updateOrderStatus(req, res, next) {
       return next(AppError.forbidden('Accès interdit', { orderId: id, userId: req.user.id }));
     }
 
-    // Valider la transition de statut
+    // Nous validons la transition de statut
     if (!isValidTransition(order.status, status)) {
       return next(
         AppError.badRequest(`Transition de statut invalide: ${order.status} → ${status}`, {
@@ -265,20 +265,20 @@ async function updateOrderStatus(req, res, next) {
       );
     }
 
-    // Ajouter la transition à l'historique
+    // Nous ajoutons la transition à l'historique
     order.statusHistory.push({
       status,
       timestamp: new Date(),
       note: note || null,
     });
 
-    // Mettre à jour le statut
+    // Nous mettons à jour le statut
     order.status = status;
     order.metadata.updatedAt = new Date();
 
     await order.save();
 
-    // Invalider le cache
+    // Nous invalidons le cache
     await cacheService.del(cacheService.getOrderDetailCacheKey(id));
     await cacheService.invalidate(`orders:user:${order.customer_id}*`);
     if (order.deliverer_id) {
@@ -296,7 +296,7 @@ async function updateOrderStatus(req, res, next) {
       timestamp: new Date(),
     };
 
-    // Émettre le nouveau statut via Socket.io à la room de la commande
+    // Nous émettons le nouveau statut via Socket.io à la room de la commande
     emitToRoom(`order:${id}`, 'order:status:updated', payload);
     emitToUser(order.customer_id.toString(), 'order:status:updated', payload);
     if (order.deliverer_id) {
@@ -338,13 +338,13 @@ async function assignDeliverer(req, res, next) {
       return next(AppError.badRequest('Livreur non disponible', { delivererId }));
     }
 
-    // Assigner ou réaffecter le livreur
+    // Nous assignons ou réaffectons le livreur
     order.deliverer_id = delivererId;
     order.metadata.updatedAt = new Date();
 
     await order.save();
 
-    // Invalider le cache
+    // Nous invalidons le cache
     await cacheService.del(cacheService.getOrderDetailCacheKey(id));
     await cacheService.invalidate(`orders:user:${order.customer_id}*`);
     await cacheService.invalidate(`orders:user:${delivererId}*`);
@@ -360,7 +360,7 @@ async function assignDeliverer(req, res, next) {
       timestamp: new Date(),
     };
 
-    // Émettre l'assignation via Socket.io à la room de la commande
+    // Nous émettons l'assignation via Socket.io à la room de la commande
     emitToRoom(`order:${id}`, 'order:deliverer:assigned', payload);
     emitToUser(order.customer_id.toString(), 'order:deliverer:assigned', payload);
     emitToUser(delivererId.toString(), 'order:deliverer:assigned', payload);
@@ -385,12 +385,12 @@ async function deleteOrder(req, res, next) {
       return next(AppError.notFound('Commande introuvable', { id }));
     }
 
-    // Seul le client peut supprimer sa propre commande
+    // Seul le client peut supprimer sa propre commande, nous vérifions cette règle
     if (order.customer_id.toString() !== req.user.id) {
       return next(AppError.forbidden('Accès interdit', { orderId: id, userId: req.user.id }));
     }
 
-    // Seules les commandes en PENDING peuvent être supprimées
+    // Nous n'autorisons la suppression que pour les commandes en PENDING
     if (order.status !== 'PENDING') {
       return next(
         AppError.badRequest('Seules les commandes en PENDING peuvent être supprimées', {
@@ -401,7 +401,7 @@ async function deleteOrder(req, res, next) {
 
     await Commande.findByIdAndDelete(id);
 
-    // Invalider le cache
+    // Nous invalidons le cache
     await cacheService.del(cacheService.getOrderDetailCacheKey(id));
     await cacheService.invalidate(`orders:user:${order.customer_id}*`);
     logger.debug('Cache invalidé pour deleteOrder', { orderId: id });

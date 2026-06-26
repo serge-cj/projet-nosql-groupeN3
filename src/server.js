@@ -15,7 +15,7 @@ const http = require('http');
     const port = config.server.port;
     const server = http.createServer(app);
     
-    // Initialiser Socket.io
+    // Nous initialisons Socket.io
     initializeSocket(server);
 
     server.on('error', (error) => {

@@ -6,7 +6,7 @@ const config = require('./config');
 
 const app = express();
 
-// ============ Middleware ============
+// ============ Nous configurons les middlewares ============
 
 app.use((req, res, next) => {
   logger.info(`${req.method} ${req.path}`);
@@ -18,10 +18,10 @@ const allowedOrigins = config.frontend.urls;
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (e.g., curl, server-side)
+      // Nous autorisons les requêtes sans origine (ex: curl, appels serveur à serveur)
       if (!origin) return callback(null, true);
 
-      // In development accept any localhost:PORT origin to avoid flaky dev-port shifts
+      // En développement, nous acceptons toute origine localhost:PORT afin d'éviter les soucis liés aux changements de port
       if (config.server.nodeEnv === 'development') {
         try {
           const parsed = new URL(origin);
@@ -29,7 +29,7 @@ app.use(
             return callback(null, true);
           }
         } catch (err) {
-          // fall through to allowedOrigins check
+          // Nous laissons la vérification se poursuivre avec allowedOrigins
         }
       }
 
@@ -49,7 +49,7 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ============ Routes ============
+// ============ Nous déclarons les routes ============
 
 app.get('/health', (req, res) => {
   res.json({
@@ -62,7 +62,7 @@ app.get('/health', (req, res) => {
 const apiRoutes = require('./routes');
 app.use('/api', apiRoutes);
 
-// Route introuvable
+// Nous gérons le cas d'une route introuvable
 app.use((req, res) => {
   res.status(404).json({
     error: 'Ressource introuvable',
@@ -70,7 +70,7 @@ app.use((req, res) => {
   });
 });
 
-// Gestionnaire d'erreurs global
+// Nous mettons en place ici le gestionnaire d'erreurs global
 app.use((err, req, res, next) => {
   logger.error('Erreur non gérée', {
     message: err.message,

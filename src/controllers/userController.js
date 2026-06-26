@@ -50,7 +50,7 @@ async function updateProfile(req, res, next) {
   }
 }
 
-// Ajoute un restaurant aux favoris ($addToSet : équivalent idempotent de $push)
+// Nous ajoutons un restaurant aux favoris ($addToSet : équivalent idempotent de $push)
 async function addFavoriteRestaurant(req, res, next) {
   try {
     const userId = req.user.id;
@@ -73,7 +73,7 @@ async function addFavoriteRestaurant(req, res, next) {
   }
 }
 
-// Retire un restaurant des favoris ($pull)
+// Nous retirons un restaurant des favoris ($pull)
 async function removeFavoriteRestaurant(req, res, next) {
   try {
     const userId = req.user.id;

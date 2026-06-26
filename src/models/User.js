@@ -75,7 +75,7 @@ const userSchema = new mongoose.Schema(
             enum: ['Point'],
             default: 'Point',
           },
-          coordinates: [Number], // [longitude, latitude]
+          coordinates: [Number], // nous stockons les coordonnées au format [longitude, latitude]
         },
         isDefault: {
           type: Boolean,
@@ -117,10 +117,10 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Index géospatial pour les requêtes de proximité
+// Nous créons un index géospatial afin de permettre les requêtes de proximité
 userSchema.index({ 'addresses.coordinates': '2dsphere' });
 
-// Hachage du mot de passe avant enregistrement
+// Nous hachons le mot de passe avant chaque enregistrement
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
 
@@ -133,12 +133,12 @@ userSchema.pre('save', async function (next) {
   }
 });
 
-// Comparaison du mot de passe
+// Nous définissons ici la méthode de comparaison du mot de passe
 userSchema.methods.comparePassword = async function (plainPassword) {
   return bcrypt.compare(plainPassword, this.password);
 };
 
-// Nom complet (virtuel)
+// Nous définissons un champ virtuel pour le nom complet
 userSchema.virtual('fullName').get(function () {
   return `${this.profile.firstName} ${this.profile.lastName}`;
 });
