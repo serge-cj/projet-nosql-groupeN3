@@ -1,4 +1,4 @@
-# Libreville Eats — Projet NoSQL (Groupe 3)
+# Libreville Eats - Projet NoSQL (Groupe 3)
 
 Application de livraison de repas à domicile à Libreville, réalisée dans le cadre du module **Bases de données NoSQL** (Master I).
 
