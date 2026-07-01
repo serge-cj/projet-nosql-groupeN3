@@ -121,7 +121,7 @@ npm run seed:clean          # Vider les collections
 ```bash
 cd frontend
 npm install
-echo "NEXT_PUBLIC_API_URL=http://localhost:5000/api" > .env.local
+echo "NEXT_PUBLIC_API_URL=http://localhost:5001/api" > .env.local
 npm run dev                        # http://localhost:3000
 ```
 
