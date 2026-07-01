@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
 import { useRouter } from 'next/navigation';
 import PageToolbar from '../../components/PageToolbar';
@@ -31,6 +31,7 @@ interface Dish {
   currency?: string;
   category?: string;
   isAvailable?: boolean;
+  quantity?: number;
   preparationTime?: number;
   image?: string;
 }
@@ -132,12 +133,28 @@ export default function RestaurantDashboard() {
     };
   }, [loadData]);
 
+  // Nous comptons ici une commande (et non un plat) par statut, à partir des seules
+  // commandes de ce restaurant : une commande n'est comptée que tant qu'elle est
+  // dans cet état précis, donc elle sort automatiquement du compte dès qu'elle avance.
+  const vendorOrderStats = useMemo(() => {
+    const since24h = Date.now() - 24 * 60 * 60 * 1000;
+    return {
+      preparing: orders.filter((o) => o.status === 'PREPARING').length,
+      onTheWay: orders.filter((o) => o.status === 'DELIVERY_IN_PROGRESS').length,
+      delivered: orders.filter((o) => {
+        if (o.status !== 'DELIVERED') return false;
+        const timestamp = o.metadata?.updatedAt || o.createdAt || o.metadata?.createdAt;
+        return timestamp ? new Date(timestamp).getTime() >= since24h : true;
+      }).length,
+    };
+  }, [orders]);
+
   return (
     <main className="min-h-screen bg-canvas text-ink">
       <PageToolbar
         title={restaurant?.name || 'Mon restaurant'}
         description={tab === 'orders' ? 'Commandes actives et historique' : 'Gérez vos menus et plats'}
-        meta={<LiveStatsBadge variant="compact" />}
+        meta={<LiveStatsBadge variant="compact" stats={vendorOrderStats} />}
       />
 
       <section className="py-10 lg:py-14">

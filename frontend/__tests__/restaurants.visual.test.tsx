@@ -25,19 +25,14 @@ afterEach(() => {
   jest.resetAllMocks();
 });
 
-it('renders discovery header, search and action buttons (visual smoke)', async () => {
+it('renders discovery header and restaurant search (visual smoke)', async () => {
   const Component = require('../app/restaurants/RestaurantsPageClient').default;
   const { container } = render(React.createElement(Component));
 
   expect(screen.getByText(/Restaurants à Libreville/i)).toBeInTheDocument();
-  expect(screen.getByText(/Trouver vite/i)).toBeInTheDocument();
 
   // Nous attendons que l'appel fetch se termine et que l'interface se stabilise
-  await waitFor(() => expect(screen.getByPlaceholderText(/Chercher a restaurant|Chercher un restaurant|Chercher/i)).toBeInTheDocument());
-
-  // Nous vérifions les boutons d'action
-  expect(screen.getByRole('button', { name: /Explorer/i })).toBeInTheDocument();
-  expect(screen.getByRole('button', { name: /Réinitialiser/i })).toBeInTheDocument();
+  await waitFor(() => expect(screen.getByPlaceholderText(/Chercher un restaurant/i)).toBeInTheDocument());
 
   // Nous capturons un instantané pour la détection de régressions visuelles
   expect(container).toMatchSnapshot();

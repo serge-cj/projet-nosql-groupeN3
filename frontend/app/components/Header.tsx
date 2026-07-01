@@ -80,8 +80,16 @@ export default function Header() {
     return () => window.removeEventListener('storage', handleStorage);
   }, [pathname]);
 
+  const isVendor = user?.role?.toUpperCase() === 'VENDOR';
+  const isDeliverer = user?.role?.toUpperCase() === 'DELIVERER';
+  // Ni le vendeur ni le livreur n'ont besoin de parcourir la vitrine client
+  // (recherche, restaurants, panier) : leur espace se limite à leur activité.
+  const hideCustomerNav = isVendor || isDeliverer;
+  const homeHref = isVendor ? '/restaurant/dashboard' : isDeliverer ? '/deliverer/dashboard' : '/';
+
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
+      if (hideCustomerNav) return;
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
         router.push('/restaurants');
@@ -90,7 +98,7 @@ export default function Header() {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [router]);
+  }, [router, hideCustomerNav]);
 
   function handleLogout() {
     localStorage.removeItem('token');
@@ -126,27 +134,29 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-divider bg-canvas/95 backdrop-blur-sm">
       <nav className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 lg:gap-6 lg:px-10">
-        <Link href="/" className="shrink-0 font-display text-lg font-semibold text-brand sm:text-xl">
+        <Link href={homeHref} className="shrink-0 font-display text-lg font-semibold text-brand sm:text-xl">
           <span className="hidden sm:inline">Libreville Eats</span>
           <span className="sm:hidden">LE</span>
         </Link>
 
-        <form onSubmit={handleSearchSubmit} className="hidden min-w-0 flex-1 md:block md:max-w-xl lg:max-w-2xl">
-          <label className="relative flex items-center">
-            <span className="sr-only">Chercher un plat</span>
-            <IconSearch className="pointer-events-none absolute left-4 h-4 w-4 text-ink-muted" />
-            <input
-              type="search"
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Chercher un plat, un restaurant…"
-              className="input-field w-full py-3 pl-11 pr-16 text-sm"
-            />
-            <kbd className="pointer-events-none absolute right-3 hidden rounded border border-divider bg-surface-1 px-1.5 py-0.5 text-[10px] font-medium text-ink-muted lg:inline">
-              ⌘K
-            </kbd>
-          </label>
-        </form>
+        {hideCustomerNav ? null : (
+          <form onSubmit={handleSearchSubmit} className="hidden min-w-0 flex-1 md:block md:max-w-xl lg:max-w-2xl">
+            <label className="relative flex items-center">
+              <span className="sr-only">Chercher un plat</span>
+              <IconSearch className="pointer-events-none absolute left-4 h-4 w-4 text-ink-muted" />
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Chercher un plat…"
+                className="input-field w-full py-3 pl-11 pr-16 text-sm"
+              />
+              <kbd className="pointer-events-none absolute right-3 hidden rounded border border-divider bg-surface-1 px-1.5 py-0.5 text-[10px] font-medium text-ink-muted lg:inline">
+                ⌘K
+              </kbd>
+            </label>
+          </form>
+        )}
 
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
           <button
@@ -158,22 +168,26 @@ export default function Header() {
             {darkMode ? <IconSun className="h-5 w-5" /> : <IconMoon className="h-5 w-5" />}
           </button>
 
-          <Link
-            href="/restaurants"
-            className="inline-flex items-center rounded-pill p-3 text-ink-muted transition-colors hover:bg-surface-1 hover:text-brand md:hidden"
-            aria-label="Rechercher"
-          >
-            <IconSearch className="h-6 w-6" />
-          </Link>
+          {hideCustomerNav ? null : (
+            <Link
+              href="/restaurants"
+              className="inline-flex items-center rounded-pill p-3 text-ink-muted transition-colors hover:bg-surface-1 hover:text-brand md:hidden"
+              aria-label="Rechercher"
+            >
+              <IconSearch className="h-6 w-6" />
+            </Link>
+          )}
 
-          <Link
-            href="/restaurants"
-            className={`hidden whitespace-nowrap text-sm font-medium transition-colors sm:inline ${
-              pathname?.startsWith('/restaurants') ? 'text-brand' : 'text-ink-muted hover:text-brand'
-            }`}
-          >
-            Restaurants
-          </Link>
+          {hideCustomerNav ? null : (
+            <Link
+              href="/restaurants"
+              className={`hidden whitespace-nowrap text-sm font-medium transition-colors sm:inline ${
+                pathname?.startsWith('/restaurants') ? 'text-brand' : 'text-ink-muted hover:text-brand'
+              }`}
+            >
+              Restaurants
+            </Link>
+          )}
 
           {user?.role?.toUpperCase() === 'DELIVERER' ? (
             <Link href="/deliverer/dashboard" className={`hidden whitespace-nowrap text-sm font-medium transition-colors lg:inline ${
@@ -193,7 +207,7 @@ export default function Header() {
 
           {user ? (
             <>
-              {cartIcon}
+              {hideCustomerNav ? null : cartIcon}
               <div className="relative">
                 <button
                   type="button"

@@ -23,7 +23,7 @@ interface OrderSummary {
 }
 
 const STATUS_LABELS: Record<OrderStatus, string> = {
-  PENDING: 'Commande reçue',
+  PENDING: 'Commande reçue par le restaurant',
   CONFIRMED: 'Confirmée',
   PREPARING: 'En préparation',
   READY_FOR_DELIVERY: 'Prête',

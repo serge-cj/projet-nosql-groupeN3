@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { IconChevronRight } from './components/icons';
 import HomeLiveBadge from './components/HomeLiveBadge';
+import VendorHomeRedirect from './components/VendorHomeRedirect';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -207,6 +208,7 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-canvas text-ink">
+      <VendorHomeRedirect />
       <section className="relative overflow-hidden border-b border-divider">
         <div className="absolute inset-0">
           <Image
@@ -221,83 +223,89 @@ export default async function Home() {
         </div>
 
         <div className="relative mx-auto max-w-6xl px-6 pb-12 pt-14 lg:px-10 lg:pb-0 lg:pt-24">
-          <HomeLiveBadge initialStats={liveOrders} />
-
-          <h1
-            className="mt-6 font-display tracking-[-0.03em] text-white"
-            style={{ overflowWrap: 'anywhere' }}
-          >
-            <span
-              className="animate-fade-in-up block text-[clamp(2.5rem,5vw+1rem,5.5rem)] font-medium leading-[0.96] text-white"
-              style={{ animationDelay: '100ms' }}
-            >
-              Vous êtes occupés?
-            </span>
-            <span
-              className="animate-fade-in-up relative mt-1 inline-block text-[clamp(3.25rem,8vw+1rem,8.75rem)] font-semibold italic leading-[0.88] tracking-[-0.045em] text-mango-300"
-              style={{ animationDelay: '220ms' }}
-            >
-              On livre.
-              <svg
-                viewBox="0 0 360 24"
-                preserveAspectRatio="none"
-                className="absolute -bottom-2 left-0 h-3 w-full text-mango-400/80 sm:-bottom-3"
-                aria-hidden="true"
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between lg:gap-10">
+            <div className="order-2 lg:order-1 lg:max-w-2xl">
+              <h1
+                className="font-display tracking-[-0.03em] text-white"
+                style={{ overflowWrap: 'anywhere' }}
               >
-                <path
-                  d="M4 16C72 6 148 4 180 9C218 15 292 19 356 8"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="6"
-                  strokeLinecap="round"
-                  className="animate-draw-underline"
-                  style={{ animationDelay: '650ms' }}
-                />
-              </svg>
-            </span>
-          </h1>
+                <span
+                  className="animate-fade-in-up block text-[clamp(2.5rem,5vw+1rem,5.5rem)] font-medium leading-[0.96] text-white"
+                  style={{ animationDelay: '100ms' }}
+                >
+                  Vous êtes occupés?
+                </span>
+                <span
+                  className="animate-fade-in-up relative mt-1 inline-block text-[clamp(3.25rem,8vw+1rem,8.75rem)] font-semibold italic leading-[0.88] tracking-[-0.045em] text-mango-300"
+                  style={{ animationDelay: '220ms' }}
+                >
+                  On livre.
+                  <svg
+                    viewBox="0 0 360 24"
+                    preserveAspectRatio="none"
+                    className="absolute -bottom-2 left-0 h-3 w-full text-mango-400/80 sm:-bottom-3"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M4 16C72 6 148 4 180 9C218 15 292 19 356 8"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="6"
+                      strokeLinecap="round"
+                      className="animate-draw-underline"
+                      style={{ animationDelay: '650ms' }}
+                    />
+                  </svg>
+                </span>
+              </h1>
 
-          <p
-            className="animate-fade-in-up mt-8 max-w-xl text-lg leading-8 text-white/90"
-            style={{ animationDelay: '360ms' }}
-          >
-            Découvre les plats disponibles maintenant, les promos du jour et les quartiers les plus dynamiques de la ville. Choisis ton plat, commande et fais-toi livrer vite.
-          </p>
+              <p
+                className="animate-fade-in-up mt-8 max-w-xl text-lg leading-8 text-white/90"
+                style={{ animationDelay: '360ms' }}
+              >
+                Découvre les plats disponibles maintenant, les promos du jour et les quartiers les plus dynamiques de la ville. Choisis ton plat, commande et fais-toi livrer vite.
+              </p>
 
-          <div
-            className="animate-fade-in-up mt-9 flex flex-col gap-4 sm:flex-row sm:items-center"
-            style={{ animationDelay: '440ms' }}
-          >
-            <Link
-              href="#plats-du-moment"
-              className="btn-primary rounded-pill px-7 py-4 text-sm font-semibold shadow-lg shadow-mango-950/30 bg-mango-400 text-ink transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-xl hover:bg-mango-500"
-            >
-              Voir les plats du jour
-            </Link>
-            <Link
-              href="/auth/register"
-              className="group inline-flex items-center gap-2 rounded-pill bg-white/10 px-4 py-4 text-sm font-semibold text-white transition duration-300 ease-out hover:bg-white/20 hover:text-mango-200"
-            >
-              Créer un compte
-              <IconChevronRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-            </Link>
-          </div>
+              <div
+                className="animate-fade-in-up mt-9 flex flex-col gap-4 sm:flex-row sm:items-center"
+                style={{ animationDelay: '440ms' }}
+              >
+                <Link
+                  href="#plats-du-moment"
+                  className="btn-primary rounded-pill px-7 py-4 text-sm font-semibold shadow-lg shadow-mango-950/30 bg-mango-400 text-ink transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-xl hover:bg-mango-500"
+                >
+                  Voir les plats du jour
+                </Link>
+                <Link
+                  href="/auth/register"
+                  className="group inline-flex items-center gap-2 rounded-pill bg-white/10 px-4 py-4 text-sm font-semibold text-white transition duration-300 ease-out hover:bg-white/20 hover:text-mango-200"
+                >
+                  Créer un compte
+                  <IconChevronRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                </Link>
+              </div>
 
-          <div
-            className="animate-fade-in-up mt-14 flex items-stretch divide-x divide-white/15 border-t border-white/15 pt-6 sm:max-w-2xl"
-            style={{ animationDelay: '520ms' }}
-          >
-            <div className="flex-1 pr-6">
-              <p className="font-mono text-3xl font-medium tabular-nums text-white sm:text-4xl">{stats.openCount}</p>
-              <p className="mt-2 text-xs uppercase tracking-[0.2em] text-white/55">Ouverts</p>
+              <div
+                className="animate-fade-in-up mt-14 flex items-stretch divide-x divide-white/15 border-t border-white/15 pt-6 sm:max-w-2xl"
+                style={{ animationDelay: '520ms' }}
+              >
+                <div className="flex-1 pr-6">
+                  <p className="font-mono text-3xl font-medium tabular-nums text-white sm:text-4xl">{stats.openCount}</p>
+                  <p className="mt-2 text-xs uppercase tracking-[0.2em] text-white/55">Ouverts</p>
+                </div>
+                <div className="flex-1 px-6">
+                  <p className="font-mono text-3xl font-medium tabular-nums text-mango-300 sm:text-4xl">{stats.availableDishCount}</p>
+                  <p className="mt-2 text-xs uppercase tracking-[0.2em] text-white/55">Plats dispo</p>
+                </div>
+                <div className="flex-1 pl-6">
+                  <p className="font-mono text-3xl font-medium tabular-nums text-white sm:text-4xl">{stats.districtCount}</p>
+                  <p className="mt-2 text-xs uppercase tracking-[0.2em] text-white/55">Quartiers</p>
+                </div>
+              </div>
             </div>
-            <div className="flex-1 px-6">
-              <p className="font-mono text-3xl font-medium tabular-nums text-mango-300 sm:text-4xl">{stats.availableDishCount}</p>
-              <p className="mt-2 text-xs uppercase tracking-[0.2em] text-white/55">Plats dispo</p>
-            </div>
-            <div className="flex-1 pl-6">
-              <p className="font-mono text-3xl font-medium tabular-nums text-white sm:text-4xl">{stats.districtCount}</p>
-              <p className="mt-2 text-xs uppercase tracking-[0.2em] text-white/55">Quartiers</p>
+
+            <div className="order-1 mb-8 lg:order-2 lg:mb-0 lg:mt-2 lg:w-80 lg:shrink-0">
+              <HomeLiveBadge initialStats={liveOrders} />
             </div>
           </div>
 

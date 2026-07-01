@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import PageToolbar from '../components/PageToolbar';
 import { useRouter } from 'next/navigation';
@@ -9,12 +10,13 @@ import { IconMinus, IconPlus, IconTrash2 } from '../components/icons';
 import { groupCartByRestaurant, getCartTotal, getTotalItems, validateCartItems, type CartItem } from '@/lib/cartHelper';
 
 const DISTRICTS = ['Nombakélé', 'Batavéa', 'Deïdate', 'Gué-Gué', 'Okala', 'Nkembo', 'Akébé', 'Lalala', 'PK5', 'Santa-Marija'];
+const PHONE_PREFIX = '+241';
+const PHONE_DIGITS_LENGTH = 8;
 const PHONE_PATTERN = /^\+241\d{8}$/;
 
 type PaymentMethod = 'CASH' | 'CARD' | 'MOBILE_MONEY';
 
 interface DeliveryForm {
-  street: string;
   district: string;
   notes: string;
   recipientName: string;
@@ -38,7 +40,6 @@ export default function CartPage() {
   const [loading, setLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
   const [deliveryForm, setDeliveryForm] = useState<DeliveryForm>({
-    street: '',
     district: '',
     notes: '',
     recipientName: '',
@@ -57,6 +58,30 @@ export default function CartPage() {
         setCartItems([]);
       }
     }
+  }, []);
+
+  useEffect(() => {
+    async function fetchDefaultRecipient() {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      try {
+        const response = await api.get('/users/profile');
+        const user = response.data?.user ?? response.data;
+        const fullName = [user?.profile?.firstName, user?.profile?.lastName].filter(Boolean).join(' ');
+        const phone = user?.profile?.phone ?? '';
+
+        setDeliveryForm((current) => ({
+          ...current,
+          recipientName: current.recipientName || fullName,
+          recipientPhone: current.recipientPhone || phone,
+        }));
+      } catch {
+        // Le préremplissage est une commodité: on laisse les champs vides en cas d'échec
+      }
+    }
+
+    fetchDefaultRecipient();
   }, []);
 
   function updateQuantity(id: string, newQuantity: number) {
@@ -110,7 +135,7 @@ export default function CartPage() {
           restaurantId: group.restaurantId,
           deliveryInfo: {
             address: {
-              street: deliveryForm.street,
+              street: '',
               district: deliveryForm.district,
               city: 'Libreville',
               ...(deliveryForm.notes.trim() && { notes: deliveryForm.notes.trim() }),
@@ -185,7 +210,17 @@ export default function CartPage() {
                     {group.items.map((item) => (
                       <div key={item.id} className="surface-card p-6">
                         <div className="flex gap-4">
-                          <div className="h-24 w-24 shrink-0 rounded-card bg-gradient-to-br from-soft to-surface-2" />
+                          <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-card bg-gradient-to-br from-soft to-surface-2">
+                            {item.image && (
+                              <Image
+                                src={item.image}
+                                alt={item.dishName}
+                                fill
+                                sizes="96px"
+                                className="object-cover"
+                              />
+                            )}
+                          </div>
 
                           <div className="flex-1 min-w-0">
                             <h4 className="font-semibold text-ink">{item.dishName}</h4>
@@ -246,26 +281,24 @@ export default function CartPage() {
 
                     <label className="block space-y-2">
                       <span className="text-sm font-semibold text-ink">Téléphone</span>
-                      <input
-                        type="tel"
-                        value={deliveryForm.recipientPhone}
-                        onChange={(event) => updateDeliveryForm('recipientPhone', event.target.value)}
-                        className="input-field"
-                        placeholder="+24170123456"
-                        pattern="\+241[0-9]{8}"
-                        required
-                      />
-                    </label>
-
-                    <label className="block space-y-2">
-                      <span className="text-sm font-semibold text-ink">Rue</span>
-                      <input
-                        type="text"
-                        value={deliveryForm.street}
-                        onChange={(event) => updateDeliveryForm('street', event.target.value)}
-                        className="input-field"
-                        required
-                      />
+                      <div className="flex">
+                        <span className="inline-flex items-center rounded-l-input border border-r-0 border-divider bg-surface-2 px-3 text-ink-muted">
+                          {PHONE_PREFIX}
+                        </span>
+                        <input
+                          type="tel"
+                          inputMode="numeric"
+                          value={deliveryForm.recipientPhone.replace(PHONE_PREFIX, '')}
+                          onChange={(event) => {
+                            const digits = event.target.value.replace(/\D/g, '').slice(0, PHONE_DIGITS_LENGTH);
+                            updateDeliveryForm('recipientPhone', digits ? `${PHONE_PREFIX}${digits}` : '');
+                          }}
+                          maxLength={PHONE_DIGITS_LENGTH}
+                          className="input-field rounded-l-none"
+                          placeholder="70123456"
+                          required
+                        />
+                      </div>
                     </label>
 
                     <label className="block space-y-2">
@@ -325,7 +358,7 @@ export default function CartPage() {
 
                   {subtotal > 20000 && (
                     <p className="rounded-pill bg-brand-ink/10 px-4 py-2 text-center text-xs font-medium text-brand-ink">
-                      Livraison gratuite estimée
+                      1000 FCFA
                     </p>
                   )}
 

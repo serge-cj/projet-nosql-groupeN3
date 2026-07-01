@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { io, type Socket } from 'socket.io-client';
 import api from '@/lib/api';
-import LiveStatsBadge from './LiveStatsBadge';
 import { IconCheck, IconPlate } from './icons';
 
 type OrderStatus =
@@ -142,8 +141,8 @@ function HorizontalOrderGauge({ stepIndex, variant }: { stepIndex: number; varia
 }
 
 // Nous suivons ici en direct la commande active la plus récente du client connecté
-// (Préparation → En route → Livrée). À défaut de commande active, nous retombons
-// sur les statistiques globales de la plateforme.
+// (Préparation → En route → Livrée). À défaut de commande active, nous n'affichons
+// rien : les statistiques globales de la plateforme ne concernent pas le client.
 export default function MyOrderStatusBadge({ variant = 'hero' }: MyOrderStatusBadgeProps) {
   const [order, setOrder] = useState<MyOrder | null | undefined>(undefined);
 
@@ -175,10 +174,7 @@ export default function MyOrderStatusBadge({ variant = 'hero' }: MyOrderStatusBa
     };
   }, [fetchMyOrder]);
 
-  if (order === undefined) return null;
-  if (order === null) {
-    return <LiveStatsBadge variant={variant} />;
-  }
+  if (!order) return null;
 
   const stepIndex = getStepIndex(order.status);
 
@@ -198,7 +194,11 @@ export default function MyOrderStatusBadge({ variant = 'hero' }: MyOrderStatusBa
   }
 
   return (
-    <Link href={`/orders/${order._id}`} className="block">
+    <Link
+      href={`/orders/${order._id}`}
+      className="animate-fade-in-up block rounded-[2rem] border border-white/10 bg-black/60 px-6 py-7 shadow-[0_35px_90px_rgba(0,0,0,0.32)] backdrop-blur-xl"
+      style={{ animationDelay: '40ms' }}
+    >
       <div className="flex items-center gap-3 text-white/80">
         <span className="relative flex h-2.5 w-2.5">
           <span className="absolute inset-0 rounded-full bg-mango-400 animate-pulse-ring" />

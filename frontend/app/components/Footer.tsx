@@ -111,7 +111,7 @@ export default function Footer() {
 
         <div className="flex flex-col gap-3 border-t border-divider pt-6 text-sm text-ink-muted sm:flex-row sm:items-center sm:justify-between">
           <p>© {year} Libreville Eats. Tous droits réservés.</p>
-          <p>Projet étudiant · Fait avec ♥ à Libreville</p>
+          <p>Projet étudiant</p>
         </div>
       </div>
     </footer>

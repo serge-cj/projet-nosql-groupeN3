@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
 import { useRouter } from 'next/navigation';
 import PageToolbar from '../../components/PageToolbar';
-import LiveStatsBadge from '../../components/LiveStatsBadge';
 import api from '@/lib/api';
 
 interface DeliveryOrder {
@@ -29,6 +28,18 @@ export default function DelivererDashboard() {
   const [error, setError] = useState('');
   const [actingOrderId, setActingOrderId] = useState<string | null>(null);
   const [user, setUser] = useState<{ id?: string; _id?: string; email: string; role: string } | null>(null);
+  const [completedDeliveries, setCompletedDeliveries] = useState(0);
+
+  // Nous comptons ici le nombre de commandes livrées par ce livreur (pas le nombre
+  // de plats), via le total de pagination renvoyé par l'API pour ce filtre.
+  const fetchCompletedDeliveries = useCallback(async () => {
+    try {
+      const response = await api.get('/orders', { params: { status: 'DELIVERED', limit: 1 } });
+      setCompletedDeliveries(response.data.pagination?.total ?? 0);
+    } catch {
+      // nous gardons la dernière valeur connue en cas d'échec réseau
+    }
+  }, []);
 
   function getSocketUrl() {
     const configuredSocketUrl = process.env.NEXT_PUBLIC_SOCKET_URL;
@@ -78,6 +89,7 @@ export default function DelivererDashboard() {
     }
 
     fetchDeliveries();
+    void fetchCompletedDeliveries();
 
     const socket: Socket = io(getSocketUrl(), {
       auth: { token },
@@ -86,6 +98,7 @@ export default function DelivererDashboard() {
 
     socket.on('order:status:updated', () => {
       void fetchDeliveries();
+      void fetchCompletedDeliveries();
     });
     socket.on('order:deliverer:assigned', () => {
       void fetchDeliveries();
@@ -94,7 +107,7 @@ export default function DelivererDashboard() {
     return () => {
       socket.disconnect();
     };
-  }, [router]);
+  }, [router, fetchCompletedDeliveries]);
 
   const availableOrders = orders.filter((o) => o.status === 'READY_FOR_DELIVERY');
   const inProgressOrders = orders.filter((o) => o.status === 'DELIVERY_IN_PROGRESS');
@@ -120,6 +133,7 @@ export default function DelivererDashboard() {
     try {
       await api.patch(`/orders/${orderId}/status`, { status: 'DELIVERED' });
       setOrders((prev) => prev.filter((o) => o._id !== orderId));
+      void fetchCompletedDeliveries();
     } catch {
       setError('Impossible de marquer cette commande comme livrée.');
     } finally {
@@ -179,7 +193,18 @@ export default function DelivererDashboard() {
       <PageToolbar
         title="Espace livreur"
         description="Courses disponibles et livraisons en cours"
-        meta={<LiveStatsBadge variant="compact" />}
+        meta={
+          <div className="flex items-center gap-x-3 rounded-pill border border-divider bg-surface-1 px-4 py-2.5 font-mono text-xs uppercase tracking-[0.14em] text-ink-muted">
+            <span className="relative flex h-2 w-2 shrink-0">
+              <span className="absolute inset-0 rounded-full bg-brand animate-pulse-ring" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
+            </span>
+            <span className="tabular-nums">
+              <span className="font-semibold text-ink">{completedDeliveries}</span> livraison
+              {completedDeliveries > 1 ? 's' : ''} effectuée{completedDeliveries > 1 ? 's' : ''}
+            </span>
+          </div>
+        }
       />
 
       <section className="py-10 lg:py-14">

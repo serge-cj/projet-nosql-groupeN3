@@ -11,6 +11,7 @@ interface Dish {
   currency?: string;
   category?: string;
   isAvailable?: boolean;
+  quantity?: number;
   preparationTime?: number;
   image?: string;
 }
@@ -45,6 +46,7 @@ export default function MenuManager({ restaurantId, menus, onUpdate }: MenuManag
   const [dishPrice, setDishPrice] = useState('');
   const [dishCategory, setDishCategory] = useState('Plats Principaux');
   const [dishIsAvailable, setDishIsAvailable] = useState(true);
+  const [dishQuantity, setDishQuantity] = useState('0');
   const [dishPreparationTime, setDishPreparationTime] = useState('15');
   const [error, setError] = useState('');
   const [isSavingMenu, setIsSavingMenu] = useState(false);
@@ -60,6 +62,7 @@ export default function MenuManager({ restaurantId, menus, onUpdate }: MenuManag
     setDishPrice('');
     setDishCategory('Plats Principaux');
     setDishIsAvailable(true);
+    setDishQuantity('0');
     setDishPreparationTime('15');
   }
 
@@ -135,6 +138,7 @@ export default function MenuManager({ restaurantId, menus, onUpdate }: MenuManag
       setDishPrice(String(dish.price));
       setDishCategory(dish.category ?? 'Plats Principaux');
       setDishIsAvailable(dish.isAvailable ?? true);
+      setDishQuantity(String(dish.quantity ?? 0));
       setDishPreparationTime(String(dish.preparationTime ?? 15));
     } else {
       resetDishForm();
@@ -155,12 +159,14 @@ export default function MenuManager({ restaurantId, menus, onUpdate }: MenuManag
 
     const parsedPrice = parseFloat(dishPrice);
     const parsedPreparationTime = Number(dishPreparationTime) || 15;
+    const parsedQuantity = Math.max(0, Number(dishQuantity) || 0);
     const payload = {
       name: dishName,
       description: dishDescription || undefined,
       price: parsedPrice,
       category: dishCategory,
       isAvailable: dishIsAvailable,
+      quantity: parsedQuantity,
       preparationTime: parsedPreparationTime,
     };
 
@@ -377,6 +383,7 @@ export default function MenuManager({ restaurantId, menus, onUpdate }: MenuManag
                                 <span className={`font-semibold ${dish.isAvailable ? 'text-forest-600' : 'text-error'}`}>
                                   {dish.isAvailable ? 'Disponible' : 'Indisponible'}
                                 </span>
+                                <span className="text-ink-muted">Stock : {dish.quantity ?? 0}</span>
                               </div>
                             </div>
                             <div className="flex gap-2">
@@ -469,6 +476,18 @@ export default function MenuManager({ restaurantId, menus, onUpdate }: MenuManag
                             <option value="true">Disponible</option>
                             <option value="false">Indisponible</option>
                           </select>
+                        </label>
+                        <label className="block space-y-1">
+                          <span className="text-xs font-semibold text-ink">Stock disponible</span>
+                          <input
+                            type="number"
+                            value={dishQuantity}
+                            onChange={(e) => setDishQuantity(e.target.value)}
+                            className="input-field text-sm"
+                            placeholder="0"
+                            min={0}
+                            disabled={savingDishIds.has(`${menu._id}-${editDishId || 'new'}`)}
+                          />
                         </label>
                         <label className="block space-y-1 sm:col-span-2">
                           <span className="text-xs font-semibold text-ink">Catégorie</span>

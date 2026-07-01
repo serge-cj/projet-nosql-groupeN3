@@ -148,7 +148,7 @@ async function getOrder(req, res, next) {
     const order = await Commande.findById(id)
       .populate({
         path: 'deliverer_id',
-        select: 'personalInfo.firstName personalInfo.lastName',
+        select: 'personalInfo.firstName personalInfo.lastName personalInfo.phone',
       });
     if (!order) {
       return next(AppError.notFound('Commande introuvable', { id }));
@@ -419,6 +419,7 @@ async function assignDeliverer(req, res, next) {
       orderId: id,
       delivererId,
       delivererName: deliverer.personalInfo?.firstName || 'Livreur',
+      delivererPhone: deliverer.personalInfo?.phone || null,
       timestamp: new Date(),
     };
 

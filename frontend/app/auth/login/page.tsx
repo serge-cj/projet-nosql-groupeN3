@@ -29,7 +29,7 @@ export default function LoginPage() {
       };
       router.push(dashboardByRole[response.data.user.role] ?? '/');
     } catch (err: any) {
-      setError(err.response?.data?.message ?? 'E-mail ou mot de passe incorrect');
+      setError(err.response?.data?.error ?? err.response?.data?.message ?? 'E-mail ou mot de passe incorrect');
     } finally {
       setLoading(false);
     }

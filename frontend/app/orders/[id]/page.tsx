@@ -42,7 +42,7 @@ interface StatusHistoryItem {
 interface Order {
   _id: string;
   restaurant_id?: string | { _id?: string; name?: string };
-  deliverer_id?: string | { _id?: string; profile?: { firstName?: string; lastName?: string } } | null;
+  deliverer_id?: string | { _id?: string; personalInfo?: { firstName?: string; lastName?: string; phone?: string } } | null;
   items: OrderItem[];
   pricing?: {
     subtotal?: number;
@@ -81,11 +81,12 @@ interface DelivererAssignedPayload {
   orderId: string;
   delivererId: string;
   delivererName?: string;
+  delivererPhone?: string | null;
   timestamp?: string;
 }
 
 const STATUS_STEPS: Array<{ status: OrderStatus; label: string }> = [
-  { status: 'PENDING', label: 'Commande reçue' },
+  { status: 'PENDING', label: 'Commande reçue par le restaurant' },
   { status: 'CONFIRMED', label: 'Confirmée' },
   { status: 'PREPARING', label: 'Préparation' },
   { status: 'READY_FOR_DELIVERY', label: 'Prête pour livraison' },
@@ -94,7 +95,7 @@ const STATUS_STEPS: Array<{ status: OrderStatus; label: string }> = [
 ];
 
 const STATUS_LABELS: Record<OrderStatus, string> = {
-  PENDING: 'Commande reçue',
+  PENDING: 'Commande reçue par le restaurant',
   CONFIRMED: 'Confirmée',
   PREPARING: 'En préparation',
   READY_FOR_DELIVERY: 'Prête pour livraison',
@@ -169,9 +170,18 @@ function getDelivererName(order: Order | null, assignedName: string) {
   if (!deliverer) return '';
   if (typeof deliverer === 'string') return deliverer;
 
-  const firstName = deliverer.profile?.firstName;
-  const lastName = deliverer.profile?.lastName;
+  const firstName = deliverer.personalInfo?.firstName;
+  const lastName = deliverer.personalInfo?.lastName;
   return [firstName, lastName].filter(Boolean).join(' ') || deliverer._id || '';
+}
+
+function getDelivererPhone(order: Order | null, assignedPhone: string) {
+  if (assignedPhone) return assignedPhone;
+
+  const deliverer = order?.deliverer_id;
+  if (!deliverer || typeof deliverer === 'string') return '';
+
+  return deliverer.personalInfo?.phone ?? '';
 }
 
 export default function OrderDetailPage({ params }: OrderProps) {
@@ -180,6 +190,7 @@ export default function OrderDetailPage({ params }: OrderProps) {
   const [error, setError] = useState('');
   const [socketStatus, setSocketStatus] = useState<'idle' | 'connected' | 'disconnected' | 'error'>('idle');
   const [assignedDelivererName, setAssignedDelivererName] = useState('');
+  const [assignedDelivererPhone, setAssignedDelivererPhone] = useState('');
 
   useEffect(() => {
     async function fetchOrder() {
@@ -259,6 +270,7 @@ export default function OrderDetailPage({ params }: OrderProps) {
     socket.on('order:deliverer:assigned', (payload: DelivererAssignedPayload) => {
       if (payload.orderId !== params.id) return;
       setAssignedDelivererName(payload.delivererName ?? '');
+      setAssignedDelivererPhone(payload.delivererPhone ?? '');
 
       setOrder((currentOrder) => {
         if (!currentOrder) return currentOrder;
@@ -289,6 +301,7 @@ export default function OrderDetailPage({ params }: OrderProps) {
   const currency = order?.pricing?.currency ?? 'FCFA';
   const address = order?.deliveryInfo?.address;
   const delivererName = getDelivererName(order, assignedDelivererName);
+  const delivererPhone = getDelivererPhone(order, assignedDelivererPhone);
 
   return (
     <main className="min-h-screen bg-canvas text-ink">
@@ -397,14 +410,14 @@ export default function OrderDetailPage({ params }: OrderProps) {
                   <div className="space-y-4 text-ink-muted">
                     <div>
                       <p className="font-semibold text-ink">{delivererName}</p>
-                      <p className="text-sm">Assigné à cette commande</p>
+                      <p className="text-sm">{delivererPhone || 'Numéro non disponible'}</p>
                     </div>
-                    {order.deliveryInfo?.recipientPhone && (
+                    {delivererPhone && (
                       <a
-                        href={`tel:${order.deliveryInfo.recipientPhone}`}
+                        href={`tel:${delivererPhone}`}
                         className="btn-primary inline-flex w-full justify-center"
                       >
-                        Appeler le destinataire
+                        Appeler le livreur
                       </a>
                     )}
                   </div>
