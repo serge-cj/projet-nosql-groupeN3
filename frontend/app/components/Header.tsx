@@ -125,22 +125,22 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-divider bg-canvas/95 backdrop-blur-sm">
-      <nav className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 lg:px-10">
+      <nav className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 lg:gap-6 lg:px-10">
         <Link href="/" className="shrink-0 font-display text-lg font-semibold text-brand sm:text-xl">
           <span className="hidden sm:inline">Libreville Eats</span>
           <span className="sm:hidden">LE</span>
         </Link>
 
-        <form onSubmit={handleSearchSubmit} className="hidden min-w-0 flex-1 md:block md:max-w-md lg:max-w-lg">
+        <form onSubmit={handleSearchSubmit} className="hidden min-w-0 flex-1 md:block md:max-w-xl lg:max-w-2xl">
           <label className="relative flex items-center">
             <span className="sr-only">Chercher un plat</span>
-            <IconSearch className="pointer-events-none absolute left-3 h-4 w-4 text-ink-muted" />
+            <IconSearch className="pointer-events-none absolute left-4 h-4 w-4 text-ink-muted" />
             <input
               type="search"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Chercher un plat…"
-              className="input-field w-full py-2.5 pl-10 pr-16 text-sm"
+              placeholder="Chercher un plat, un restaurant…"
+              className="input-field w-full py-3 pl-11 pr-16 text-sm"
             />
             <kbd className="pointer-events-none absolute right-3 hidden rounded border border-divider bg-surface-1 px-1.5 py-0.5 text-[10px] font-medium text-ink-muted lg:inline">
               ⌘K
@@ -254,9 +254,6 @@ export default function Header() {
           ) : (
             <>
               {cartIcon}
-              <Link href="/auth/pro" className="btn-secondary hidden px-4 py-2 text-sm sm:inline-flex">
-                Espace pro
-              </Link>
               <Link href="/auth/login" className="btn-secondary hidden px-4 py-2 text-sm sm:inline-flex">
                 Connexion
               </Link>

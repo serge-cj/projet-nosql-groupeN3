@@ -389,7 +389,7 @@ export default async function Home() {
             </p>
           </div>
 
-          <div className="group relative mt-8 h-[560px] [mask-image:linear-gradient(to_bottom,transparent,black_8%,black_92%,transparent)]">
+          <div className="relative mt-8 h-[560px] [mask-image:linear-gradient(to_bottom,transparent,black_8%,black_92%,transparent)]">
             <div className="mx-auto grid h-full max-w-6xl grid-cols-2 gap-4 px-6 sm:grid-cols-3 lg:grid-cols-4 lg:px-10">
               {masonryColumns.map((columnDishes, columnIndex) => (
                 <div
@@ -399,7 +399,7 @@ export default async function Home() {
                   }`}
                 >
                   <div
-                    className={`flex flex-col gap-4 group-hover:[animation-play-state:paused] ${
+                    className={`flex flex-col gap-4 has-[a:hover]:[animation-play-state:paused] ${
                       columnIndex % 2 === 0 ? 'animate-marquee-vertical' : 'animate-marquee-vertical-reverse'
                     }`}
                     style={{ animationDuration: `${Math.max(columnDishes.length, 6) * 10 + columnIndex * 4}s` }}
