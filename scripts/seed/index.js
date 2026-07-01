@@ -186,6 +186,7 @@ async function seedRestaurants(vendors) {
       name: r.name,
       email: r.email,
       phone: r.phone,
+      image: r.image,
       address: {
         street: r.street,
         district: r.district,

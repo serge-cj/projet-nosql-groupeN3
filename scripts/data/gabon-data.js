@@ -261,6 +261,7 @@ const LAST_NAMES = [
 const REAL_RESTAURANTS = [
   {
     name: "KFC - Nzeng Ayong",
+    image: '/logos/kfc.svg',
     street: "CFF9+PW, Nzeng Ayong, Libreville, Gabon",
     district: "Nzeng Ayong",
     coordinates: [9.505, 0.455],
@@ -291,6 +292,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "KFC - Owendo",
+    image: '/logos/kfc.svg',
     street: "8FQH+V8, Owendo, Gabon",
     district: "Owendo",
     coordinates: [9.51, 0.355],
@@ -321,6 +323,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "KFC - Avorbam (Secteur Okala)",
+    image: '/logos/kfc.svg',
     street: "F9XV+CF7, Route d'Okala (Axe Avorbam), Libreville, Gabon",
     district: "Okala",
     coordinates: [9.45, 0.405],
@@ -351,6 +354,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "Blé Doré - Avorbam",
+    image: '/logos/ble-dore.jpg',
     street: "F9XV+M54, Route d'Avorbam, Akanda, Gabon",
     district: "Akanda",
     coordinates: [9.445, 0.52],
@@ -381,6 +385,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "Blé Doré - Owendo",
+    image: '/logos/ble-dore.jpg',
     street: "8FMM+XQH, Boulevard de l'Indépendance, Owendo, Gabon",
     district: "Owendo",
     coordinates: [9.51, 0.355],
@@ -411,6 +416,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "Hama Burger n' co - Akanda",
+    image: '/logos/hama.jpg',
     street: "GC83+244 Parasoliers, Akanda, Gabon",
     district: "Akanda",
     coordinates: [9.445, 0.52],
@@ -441,6 +447,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "Hama Burger n' co - 3 Quartiers",
+    image: '/logos/hama.jpg',
     street: "3 Quartiers, Libreville, Gabon",
     district: "3 Quartiers",
     coordinates: [9.438, 0.392],
@@ -471,6 +478,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "Morelli's Gelato - Baie Des Rois",
+    image: '/logos/morellis.jpg',
     street: "CC3J+P6, Promenade de la Baie des Rois, Libreville, Gabon",
     district: "Baie des Rois",
     coordinates: [9.454, 0.387],
@@ -501,6 +509,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "Morelli's Gelato - Classico Club",
+    image: '/logos/morellis.jpg',
     street: "Complexe Classico Club, Libreville, Gabon",
     district: "Glass",
     coordinates: [9.447, 0.398],
@@ -531,6 +540,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "Pinkberry",
+    image: '/logos/pinkberry.jpg',
     street: "L101, Zone commerciale (proche Boulevard Triomphal), Libreville, Gabon",
     district: "Centre-ville",
     coordinates: [9.449, 0.392],
@@ -561,6 +571,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "La Braise",
+    image: '/logos/la-braise.jpg',
     street: "Promenade de la Baie des Rois, BP 20320, Libreville, Gabon",
     district: "Baie des Rois",
     coordinates: [9.454, 0.387],
@@ -591,6 +602,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "L'Emir",
+    image: '/logos/lemir.jpg',
     street: "Quartier Louis, Libreville, Gabon",
     district: "Louis",
     coordinates: [9.44, 0.45],
@@ -621,6 +633,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "La Voile Rouge",
+    image: '/logos/la-voile-rouge.jpg',
     street: "Boulevard de l'Indépendance, Front de mer, Libreville, Gabon",
     district: "Centre-ville",
     coordinates: [9.449, 0.392],
@@ -651,6 +664,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "Mun",
+    image: '/logos/mun.jpg',
     street: "Quartier Sablière, Akanda, Gabon",
     district: "Akanda",
     coordinates: [9.445, 0.52],
@@ -681,6 +695,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "PAUL - Glass",
+    image: '/logos/paul.png',
     street: "Boulevard Maritime, Quartier Glass, Libreville, Gabon",
     district: "Glass",
     coordinates: [9.447, 0.398],
@@ -711,6 +726,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "PAUL - Carrefour",
+    image: '/logos/paul.png',
     street: "Rond-point du Carrefour Léon Mba, Libreville, Gabon",
     district: "Centre-ville",
     coordinates: [9.449, 0.392],
@@ -741,6 +757,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "PAUL - 3 Quartiers",
+    image: '/logos/paul.png',
     street: "Avenue de l'Indépendance, 3 Quartiers, Libreville, Gabon",
     district: "3 Quartiers",
     coordinates: [9.438, 0.392],
@@ -771,6 +788,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "PAUL - Aéroport",
+    image: '/logos/paul.png',
     street: "Hall des départs, Aéroport International Léon-Mba, Libreville, Gabon",
     district: "Aéroport",
     coordinates: [9.412, 0.458],
@@ -801,6 +819,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "PAUL - Centre ville",
+    image: '/logos/paul.png',
     street: "Place de l'Indépendance, Centre-ville, Libreville, Gabon",
     district: "Centre-ville",
     coordinates: [9.449, 0.392],
@@ -831,6 +850,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "PAUL - Baie Des Rois",
+    image: '/logos/paul.png',
     street: "Promenade de la Baie des Rois, Libreville, Gabon",
     district: "Baie des Rois",
     coordinates: [9.454, 0.387],
@@ -861,6 +881,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "Cacao",
+    image: '/logos/cacao.jpg',
     street: "Quartier Batterie IV, Libreville, Gabon",
     district: "Batterie IV",
     coordinates: [9.462, 0.448],
@@ -891,6 +912,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "King Of Tacos",
+    image: '/logos/king-of-tacos.jpg',
     street: "Carrefour JDO, Libreville, Gabon",
     district: "Carrefour JDO",
     coordinates: [9.47, 0.44],
@@ -921,6 +943,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "KFC - Aéroport",
+    image: '/logos/kfc.svg',
     street: "Zone commerciale de l'Aéroport International Léon-Mba, Libreville, Gabon",
     district: "Aéroport",
     coordinates: [9.412, 0.458],
@@ -951,6 +974,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "KFC - Glass",
+    image: '/logos/kfc.svg',
     street: "Boulevard Triomphal (Axe Glass), Libreville, Gabon",
     district: "Glass",
     coordinates: [9.447, 0.398],
@@ -981,6 +1005,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "Bantu",
+    image: '/logos/bantu.jpg',
     street: "Quartier Louis, Libreville, Gabon",
     district: "Louis",
     coordinates: [9.44, 0.45],
@@ -1011,6 +1036,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "Mystic Bantu",
+    image: '/logos/mystic-bantu.jpg',
     street: "Quartier Sablière, Akanda, Gabon",
     district: "Akanda",
     coordinates: [9.445, 0.52],
@@ -1041,6 +1067,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "Maison M",
+    image: '/logos/maison-m.jpg',
     street: "Quartier Louis, Libreville, Gabon",
     district: "Louis",
     coordinates: [9.44, 0.45],
@@ -1071,6 +1098,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "L'iroko",
+    image: '/logos/iroko.jpg',
     street: "Bas de Gué-Gué, Libreville, Gabon",
     district: "Gué-Gué",
     coordinates: [9.475, 0.415],
@@ -1101,6 +1129,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "Tivoli",
+    image: '/logos/tivoli.jpg',
     street: "Quartier Montagne Sainte, Libreville, Gabon",
     district: "Montagne Sainte",
     coordinates: [9.435, 0.415],
@@ -1131,6 +1160,7 @@ const REAL_RESTAURANTS = [
   },
   {
     name: "Eat Vite",
+    image: '/logos/eat-vite.jpg',
     street: "Carrefour JDO, Libreville, Gabon",
     district: "Carrefour JDO",
     coordinates: [9.47, 0.44],
