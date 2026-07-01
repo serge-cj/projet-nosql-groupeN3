@@ -187,12 +187,14 @@ export default function RestaurantsPageClient() {
                           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(62,153,255,0.16),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(255,168,0,0.18),transparent_30%)]" />
                         )}
 
-                        <div
-                          className="absolute bottom-3 left-3 flex h-11 w-11 items-center justify-center rounded-full border border-divider bg-canvas/95 text-xs font-bold uppercase tracking-wide text-brand shadow-soft"
-                          title={brandName}
-                        >
-                          {brandInitials}
-                        </div>
+                        {!restaurant.image && (
+                          <div
+                            className="absolute bottom-3 left-3 flex h-11 w-11 items-center justify-center rounded-full border border-divider bg-canvas/95 text-xs font-bold uppercase tracking-wide text-brand shadow-soft"
+                            title={brandName}
+                          >
+                            {brandInitials}
+                          </div>
+                        )}
 
                         <div className="absolute inset-x-0 top-0 flex justify-between p-4">
                           <span
