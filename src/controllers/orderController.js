@@ -171,12 +171,53 @@ async function getOrder(req, res, next) {
   }
 }
 
+// Nous exposons ici un aperçu public (sans authentification) du nombre de commandes
+// actuellement en préparation, en cours de livraison, et livrées dans les dernières 24h.
+async function getLiveOrderStats(req, res, next) {
+  try {
+    const cacheKey = 'orders:live-stats';
+
+    const cached = await cacheService.get(cacheKey);
+    if (cached) {
+      logger.debug('Cache hit pour getLiveOrderStats', { cacheKey });
+      return res.json(cached);
+    }
+
+    const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    const [preparing, onTheWay, delivered] = await Promise.all([
+      Commande.countDocuments({ status: 'PREPARING' }),
+      Commande.countDocuments({ status: 'DELIVERY_IN_PROGRESS' }),
+      Commande.countDocuments({ status: 'DELIVERED', 'metadata.updatedAt': { $gte: since24h } }),
+    ]);
+
+    const response = { stats: { preparing, onTheWay, delivered } };
+
+    await cacheService.set(cacheKey, response, cacheService.TTL.LIVE_ORDER_STATS);
+    logger.debug('Cache set pour getLiveOrderStats', { cacheKey });
+
+    res.json(response);
+  } catch (err) {
+    logger.error('Erreur stats commandes en direct', { message: err.message, stack: err.stack });
+    next(err);
+  }
+}
+
 async function listOrders(req, res, next) {
   try {
     const { status, page = 1, limit = 10 } = req.query;
-    const filter = {
-      $or: [{ customer_id: req.user.id }, { deliverer_id: req.user.id }],
-    };
+    const ownOrdersFilter = { $or: [{ customer_id: req.user.id }, { deliverer_id: req.user.id }] };
+
+    let filter;
+    if (req.user.role === 'DELIVERER') {
+      filter = { $or: [...ownOrdersFilter.$or, { status: 'READY_FOR_DELIVERY', deliverer_id: null }] };
+    } else if (req.user.role === 'VENDOR') {
+      // Nous récupérons les commandes passées dans les restaurants possédés par ce vendeur
+      const ownedRestaurants = await Restaurant.find({ owner_id: req.user.id }).select('_id');
+      filter = { restaurant_id: { $in: ownedRestaurants.map((r) => r._id) } };
+    } else {
+      filter = ownOrdersFilter;
+    }
     if (status) filter.status = status;
 
     const pageNum = parseInt(page, 10);
@@ -325,7 +366,18 @@ async function assignDeliverer(req, res, next) {
     }
 
     const restaurant = await Restaurant.findById(order.restaurant_id);
-    if (!restaurant || restaurant.owner_id.toString() !== req.user.id) {
+
+    // Nous distinguons deux chemins : le restaurateur qui assigne manuellement un livreur
+    // de son choix, ou un livreur qui s'auto-assigne une course disponible.
+    const isSelfAcceptingDeliverer = req.user.role === 'DELIVERER' && delivererId === req.user.id;
+
+    if (isSelfAcceptingDeliverer) {
+      if (order.status !== 'READY_FOR_DELIVERY' || order.deliverer_id) {
+        return next(
+          AppError.badRequest('Cette commande n’est plus disponible pour livraison', { orderId: id })
+        );
+      }
+    } else if (!restaurant || restaurant.owner_id.toString() !== req.user.id) {
       return next(AppError.forbidden('Vous n’avez pas le droit d’assigner un livreur à cette commande', { orderId: id }));
     }
 
@@ -342,6 +394,16 @@ async function assignDeliverer(req, res, next) {
     order.deliverer_id = delivererId;
     order.metadata.updatedAt = new Date();
 
+    // Lorsqu'un livreur accepte lui-même la course, l'acceptation vaut prise en charge immédiate
+    if (isSelfAcceptingDeliverer && isValidTransition(order.status, 'DELIVERY_IN_PROGRESS')) {
+      order.status = 'DELIVERY_IN_PROGRESS';
+      order.statusHistory.push({
+        status: 'DELIVERY_IN_PROGRESS',
+        timestamp: new Date(),
+        note: 'Acceptée par le livreur',
+      });
+    }
+
     await order.save();
 
     // Nous invalidons le cache
@@ -356,7 +418,7 @@ async function assignDeliverer(req, res, next) {
     const payload = {
       orderId: id,
       delivererId,
-      delivererName: deliverer.profile?.firstName || 'Livreur',
+      delivererName: deliverer.personalInfo?.firstName || 'Livreur',
       timestamp: new Date(),
     };
 
@@ -368,6 +430,21 @@ async function assignDeliverer(req, res, next) {
       emitToUser(restaurant.owner_id.toString(), 'order:deliverer:assigned', payload);
     }
     logger.debug('Assignation livreur émise via Socket.io', { orderId: id, delivererId });
+
+    if (isSelfAcceptingDeliverer && order.status === 'DELIVERY_IN_PROGRESS') {
+      const statusPayload = {
+        orderId: id,
+        status: 'DELIVERY_IN_PROGRESS',
+        note: 'Acceptée par le livreur',
+        timestamp: new Date(),
+      };
+      emitToRoom(`order:${id}`, 'order:status:updated', statusPayload);
+      emitToUser(order.customer_id.toString(), 'order:status:updated', statusPayload);
+      emitToUser(delivererId.toString(), 'order:status:updated', statusPayload);
+      if (restaurant?.owner_id) {
+        emitToUser(restaurant.owner_id.toString(), 'order:status:updated', statusPayload);
+      }
+    }
 
     res.json({ order });
   } catch (err) {
@@ -417,6 +494,7 @@ module.exports = {
   createOrder,
   getOrder,
   listOrders,
+  getLiveOrderStats,
   updateOrderStatus,
   assignDeliverer,
   deleteOrder,

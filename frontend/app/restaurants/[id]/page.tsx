@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 import api from '@/lib/api';
 import RestaurantDetailClient from './RestaurantDetailClient';
 
@@ -23,5 +24,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default function RestaurantDetailPage({ params }: Props) {
-  return <RestaurantDetailClient params={params} />;
+  return (
+    <Suspense fallback={<main className="min-h-screen bg-canvas p-10 text-ink-muted">Chargement…</main>}>
+      <RestaurantDetailClient params={params} />
+    </Suspense>
+  );
 }

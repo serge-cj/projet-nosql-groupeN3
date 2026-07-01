@@ -80,6 +80,96 @@ async function listOpenRestaurantsWithAvailability(req, res, next) {
   }
 }
 
+// Nous recherchons ou parcourons ici des plats précis (et non des restaurants) à travers tous les menus.
+// Sans paramètre "q", nous listons les plats disponibles (mode parcours) ; avec "q", nous filtrons par nom.
+async function searchDishes(req, res, next) {
+  try {
+    const { q, district, category, page = 1, limit = 12 } = req.query;
+    const query = (q || '').trim();
+
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+    const skip = (pageNum - 1) * limitNum;
+
+    const cacheKey = cacheService.getDishSearchCacheKey(query, district, category, pageNum, limitNum);
+    const cached = await cacheService.get(cacheKey);
+    if (cached) {
+      logger.debug('Cache hit pour searchDishes', { cacheKey });
+      return res.json(cached);
+    }
+
+    const dishMatch = {
+      'menus.dishes.isAvailable': true,
+      'menus.dishes.quantity': { $gt: 0 },
+    };
+
+    if (query) {
+      const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      dishMatch['menus.dishes.name'] = new RegExp(escapedQuery, 'i');
+    }
+    if (category) dishMatch['menus.dishes.category'] = category;
+
+    const restaurantMatch = { ...dishMatch };
+    if (district) restaurantMatch['address.district'] = district;
+
+    const pipeline = [
+      { $match: restaurantMatch },
+      { $unwind: '$menus' },
+      { $unwind: '$menus.dishes' },
+      { $match: dishMatch },
+      {
+        $project: {
+          _id: 0,
+          dishId: '$menus.dishes._id',
+          name: '$menus.dishes.name',
+          description: '$menus.dishes.description',
+          price: '$menus.dishes.price',
+          currency: '$menus.dishes.currency',
+          category: '$menus.dishes.category',
+          isAvailable: '$menus.dishes.isAvailable',
+          quantity: '$menus.dishes.quantity',
+          image: '$menus.dishes.image',
+          restaurantId: '$_id',
+          restaurantName: '$name',
+          district: '$address.district',
+        },
+      },
+      { $sort: { name: 1 } },
+      {
+        $facet: {
+          dishes: [{ $skip: skip }, { $limit: limitNum }],
+          total: [{ $count: 'count' }],
+        },
+      },
+    ];
+
+    const [result] = await Restaurant.aggregate(pipeline);
+    const dishes = result?.dishes || [];
+    const total = result?.total?.[0]?.count || 0;
+    const totalPages = Math.ceil(total / limitNum);
+
+    const response = {
+      dishes,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages,
+        hasNext: pageNum < totalPages,
+        hasPrev: pageNum > 1,
+      },
+    };
+
+    await cacheService.set(cacheKey, response, cacheService.TTL.DISHES);
+    logger.debug('Cache set pour searchDishes', { cacheKey });
+
+    res.json(response);
+  } catch (err) {
+    logger.error('Erreur recherche de plats', { message: err.message, stack: err.stack });
+    next(err);
+  }
+}
+
 async function getRestaurantById(req, res, next) {
   try {
     const { id } = req.params;
@@ -486,6 +576,7 @@ async function deleteDish(req, res, next) {
 module.exports = {
   listRestaurants,
   listOpenRestaurantsWithAvailability,
+  searchDishes,
   getRestaurantById,
   nearbyRestaurants,
   updateRestaurant,

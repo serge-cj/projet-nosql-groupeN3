@@ -1,12 +1,11 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import Link from 'next/link';
 import api from '@/lib/api';
 import CartDrawer from '@/app/components/CartDrawer';
-import { IconCart, IconCheck } from '@/app/components/icons';
+import { IconCheck } from '@/app/components/icons';
 import { loadCart, saveCart, addToCart as cartHelperAddToCart, getCartTotal } from '@/lib/cartHelper';
 
 interface Props {
@@ -64,6 +63,8 @@ interface CartItem {
 
 export default function RestaurantDetailClient({ params }: Props) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const highlightedDishId = searchParams.get('dish');
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -96,6 +97,12 @@ export default function RestaurantDetailClient({ params }: Props) {
     fetchRestaurant();
   }, [params.id]);
 
+  useEffect(() => {
+    if (!restaurant || !highlightedDishId) return;
+    const element = document.getElementById(`dish-${highlightedDishId}`);
+    element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [restaurant, highlightedDishId]);
+
   const totalCartItems = useMemo(
     () => cartItems.reduce((sum, item) => sum + item.quantity, 0),
     [cartItems]
@@ -111,7 +118,6 @@ export default function RestaurantDetailClient({ params }: Props) {
     router.push('/cart');
   }
 
-  const deliveryInfo = restaurant?.deliveryZones?.[0];
   const menuCount = restaurant?.menus?.reduce((count, menu) => count + menu.dishes.length, 0) ?? 0;
 
   const categoryGroups = useMemo(() => {
@@ -183,131 +189,70 @@ export default function RestaurantDetailClient({ params }: Props) {
   return (
     <main id="top" className="min-h-screen bg-canvas text-ink pb-24">
       <section className="border-b border-divider bg-surface-1">
-        <div className="mx-auto max-w-6xl px-6 py-8 lg:px-10 lg:py-10">
-          {loading ? (
+        {loading ? (
+          <div className="mx-auto max-w-6xl px-6 py-8 lg:px-10 lg:py-10">
             <p className="text-ink-muted">Chargement du restaurant…</p>
-          ) : error ? (
+          </div>
+        ) : error ? (
+          <div className="mx-auto max-w-6xl px-6 py-8 lg:px-10 lg:py-10">
             <p className="text-error">{error}</p>
-          ) : restaurant ? (
-            <div className="space-y-6">
-              <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-end">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2 text-sm">
-                    <span
-                      className={`rounded-pill px-3 py-1 text-xs font-semibold ${
-                        restaurant.isOpen ? 'bg-forest-100 text-forest-900' : 'bg-surface-1 text-ink'
-                      }`}
-                    >
-                      {restaurant.isOpen ? 'Ouvert' : 'Fermé'}
-                    </span>
-                    <span className="rounded-pill border border-divider bg-surface-1 px-3 py-1 text-xs font-semibold text-ink">
-                      {restaurant.address?.district || 'Libreville'}
-                    </span>
-                    <span className="rounded-pill border border-divider bg-surface-1 px-3 py-1 text-xs font-semibold text-ink">
-                      {restaurant.rating ? `${restaurant.rating.toFixed(1)}` : 'Nouveau'}
-                    </span>
-                  </div>
+          </div>
+        ) : restaurant ? (
+          <div className="relative overflow-hidden">
+            <div className="absolute inset-0">
+              {restaurant.image ? (
+                <Image
+                  src={restaurant.image}
+                  alt={`Photo du restaurant ${restaurant.name}`}
+                  fill
+                  sizes="100vw"
+                  className="object-cover"
+                  priority
+                />
+              ) : (
+                <div className="h-full w-full bg-[radial-gradient(circle_at_top_left,rgba(62,153,255,0.35),transparent_45%),radial-gradient(circle_at_bottom_right,rgba(255,168,0,0.35),transparent_45%)] bg-surface-1" />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/55 to-black/10" />
+            </div>
 
-                  <h1 className="mt-5 font-display text-4xl font-semibold tracking-tight sm:text-5xl" style={{ overflowWrap: 'anywhere' }}>
-                    {restaurant.name}
-                  </h1>
-
-                  <p className="mt-4 max-w-2xl text-base leading-7 text-ink-muted">
-                    {restaurant.address?.street
-                      ? `${restaurant.address.street}, ${restaurant.address.district}`
-                      : 'Plonge dans la carte, commande les plats chauds et reçois ton repas rapidement.'}
-                  </p>
-
-                  <div className="mt-6 flex flex-wrap gap-3">
-                    <span className="rounded-pill border border-divider bg-surface-1 px-4 py-2 text-sm text-ink">
-                      {restaurant.menus?.length ? `${restaurant.menus.length} menu${restaurant.menus.length !== 1 ? 's' : ''}` : 'Menu en ligne'}
-                    </span>
-                    <span className="rounded-pill border border-divider bg-surface-1 px-4 py-2 text-sm text-ink">
-                      {menuCount} plat{menuCount !== 1 ? 's' : ''}
-                    </span>
-                    <span className="rounded-pill border border-divider bg-surface-1 px-4 py-2 text-sm text-ink">
-                      {deliveryInfo?.deliveryTime ? `${deliveryInfo.deliveryTime} min de livraison` : 'Livraison rapide'}
-                    </span>
-                  </div>
-                </div>
-                <div className="pointer-events-none hidden lg:block">
-                  <div
-                    className={`sticky top-24 rounded-card border border-divider bg-surface-1 p-4 text-sm text-ink-muted shadow-soft transition-transform duration-300 ${
-                      cartPulse ? 'scale-105 border-brand' : ''
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand/10 text-brand">
-                        <IconCart className="h-5 w-5" />
-                      </span>
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.24em] text-ink-muted">Panier rapide</p>
-                        <p className="mt-1 text-base font-semibold text-ink">{totalCartItems} article{totalCartItems !== 1 ? 's' : ''}</p>
-                        <p className="text-sm tabular-nums text-ink-muted">{currentCartTotal.toLocaleString()} FCFA</p>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleToggleDrawer}
-                      className="btn-primary mt-4 w-full text-sm"
-                    >
-                      Ouvrir le panier
-                    </button>
-                  </div>
-                </div>
-
-                <aside className="grid gap-4">
-                  <div className="rounded-card border border-divider bg-surface-1 p-6 shadow-soft">
-                    <p className="text-sm font-semibold uppercase tracking-[0.24em] text-ink-muted">Carte du restaurant</p>
-                    <p className="mt-4 text-lg font-semibold text-ink">Découvrez les classiques et les coups de cœur du chef.</p>
-                    <dl className="mt-6 grid gap-3 text-sm text-ink-muted">
-                      <div className="rounded-pill border border-divider bg-canvas px-4 py-3">
-                        <dt>Service</dt>
-                        <dd className="mt-1 font-semibold text-ink">Livraison & retrait</dd>
-                      </div>
-                      <div className="rounded-pill border border-divider bg-canvas px-4 py-3">
-                        <dt>Budget moyen</dt>
-                        <dd className="mt-1 font-semibold text-ink">{deliveryInfo?.deliveryFee ? `${(deliveryInfo.deliveryFee + 2000).toLocaleString()} FCFA` : '1200 FCFA'}</dd>
-                      </div>
-                    </dl>
-                  </div>
-
-                  <div
-                    className={`rounded-card border border-divider bg-surface-1 p-6 shadow-soft transition-transform duration-300 ${
-                      cartPulse ? 'scale-105 border-brand' : ''
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <p className="text-sm text-ink-muted">Panier</p>
-                        <p className="mt-1 text-lg font-semibold text-ink">{totalCartItems} article{totalCartItems !== 1 ? 's' : ''}</p>
-                      </div>
-                      <span className="rounded-pill bg-brand/10 px-3 py-1 text-xs font-semibold text-brand">Prêt</span>
-                    </div>
-                    <Link href="/cart" className="btn-primary mt-6 w-full text-sm">
-                      Voir le panier
-                    </Link>
-                  </div>
-                </aside>
+            <div className="relative mx-auto max-w-6xl px-6 py-12 lg:px-10 lg:py-20">
+              <div className="flex flex-wrap items-center gap-2 text-sm">
+                <span
+                  className={`rounded-pill px-3 py-1 text-xs font-semibold ${
+                    restaurant.isOpen ? 'bg-forest-100 text-forest-900' : 'bg-error text-white'
+                  }`}
+                >
+                  {restaurant.isOpen ? 'Ouvert' : 'Fermé'}
+                </span>
+                <span className="rounded-pill border border-white/30 bg-black/30 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+                  {restaurant.address?.district || 'Libreville'}
+                </span>
+                <span className="rounded-pill border border-white/30 bg-black/30 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+                  {restaurant.rating ? `${restaurant.rating.toFixed(1)}` : 'Nouveau'}
+                </span>
               </div>
 
-              {restaurant.image ? (
-                <div className="overflow-hidden rounded-card border border-divider bg-surface-1 shadow-soft">
-                  <div className="relative h-72 sm:h-80">
-                    <Image
-                      src={restaurant.image}
-                      alt={`Photo du restaurant ${restaurant.name}`}
-                      fill
-                      sizes="100vw"
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-canvas/95 to-transparent" />
-                  </div>
-                </div>
-              ) : null}
+              <h1
+                className="mt-5 font-display text-4xl font-semibold tracking-tight text-white sm:text-5xl"
+                style={{ overflowWrap: 'anywhere' }}
+              >
+                {restaurant.name}
+              </h1>
+
+              <p className="mt-4 max-w-2xl text-base leading-7 text-white/80">
+                {restaurant.address?.street
+                  ? `${restaurant.address.street}, ${restaurant.address.district}`
+                  : 'Plonge dans la carte, commande les plats chauds et reçois ton repas rapidement.'}
+              </p>
+
+              <div className="mt-6 flex flex-wrap gap-3">
+                <span className="rounded-pill border border-white/30 bg-black/30 px-4 py-2 text-sm text-white backdrop-blur-sm">
+                  {menuCount} plat{menuCount !== 1 ? 's' : ''}
+                </span>
+              </div>
             </div>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </section>
 
       <section className="py-10 lg:py-14">
@@ -342,7 +287,12 @@ export default function RestaurantDetailClient({ params }: Props) {
                         {group.dishes.map((dish) => (
                           <li
                             key={dish._id ?? `${dish.name}-${dish.price}`}
-                            className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between"
+                            id={dish._id ? `dish-${dish._id}` : undefined}
+                            className={`flex flex-col gap-4 py-5 scroll-mt-28 sm:flex-row sm:items-center sm:justify-between ${
+                              dish._id && dish._id === highlightedDishId
+                                ? 'rounded-card border border-brand bg-brand/5 px-4 -mx-4'
+                                : ''
+                            }`}
                           >
                             <div className="min-w-0 space-y-2">
                               {dish.image ? (

@@ -4,6 +4,8 @@ require('dotenv').config();
 const config = require('../../src/config');
 const { User, Restaurant, Deliverer } = require('../../src/models');
 const gabanData = require('../data/gabon-data');
+const { connectRedis, disconnectRedis } = require('../../src/config/redis');
+const cacheService = require('../../src/services/cacheService');
 
 const { logger } = require('../../src/utils/logger');
 
@@ -176,6 +178,7 @@ async function seedRestaurants(vendors) {
         isAvailable: !outOfStock,
         quantity: outOfStock ? 0 : randomInt(20, 100),
         preparationTime: randomInt(8, 30),
+        image: d.image,
       };
     });
 
@@ -229,6 +232,7 @@ async function seedDeliverers(delivererUsers) {
     const coordinates = DISTRICT_COORDINATES[district] || [9.4583, 0.4162];
 
     deliverers.push({
+      _id: user._id,
       user_id: user._id,
       personalInfo: {
         firstName: user.profile.firstName,
@@ -325,6 +329,16 @@ async function seedDatabase() {
 
     // Nous peuplons les livreurs
     await seedDeliverers(delivererUsers);
+
+    // Nous invalidons le cache Redis : sans cela, les anciennes réponses (ex. listes de
+    // restaurants/total isOpen) restent servies jusqu'à expiration du TTL (1h) alors que
+    // les données viennent de changer en base.
+    await connectRedis();
+    const invalidatedCount = await cacheService.invalidate('restaurants:*');
+    await cacheService.invalidate('restaurant:*');
+    await cacheService.invalidate('dishes:*');
+    await disconnectRedis();
+    logger.info(`Cache Redis invalidé (${invalidatedCount} clés "restaurants:*")`);
 
     logger.info(
       'Peuplement de la base terminé !\n' +

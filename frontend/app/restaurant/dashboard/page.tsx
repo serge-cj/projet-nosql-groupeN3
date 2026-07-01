@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
 import { useRouter } from 'next/navigation';
 import PageToolbar from '../../components/PageToolbar';
+import LiveStatsBadge from '../../components/LiveStatsBadge';
 import MenuManager from '../components/MenuManager';
 import OrderManager from '../components/OrderManager';
 import api from '@/lib/api';
@@ -136,6 +137,7 @@ export default function RestaurantDashboard() {
       <PageToolbar
         title={restaurant?.name || 'Mon restaurant'}
         description={tab === 'orders' ? 'Commandes actives et historique' : 'Gérez vos menus et plats'}
+        meta={<LiveStatsBadge variant="compact" />}
       />
 
       <section className="py-10 lg:py-14">

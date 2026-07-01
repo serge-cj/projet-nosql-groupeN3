@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 export const dynamic = 'force-dynamic';
 import PageToolbar from '../components/PageToolbar';
 import { OrderCardSkeleton } from '../components/Skeleton';
+import MyOrderStatusBadge from '../components/MyOrderStatusBadge';
 import api from '@/lib/api';
 
 type OrderStatus =
@@ -89,7 +90,11 @@ export default function OrdersPage() {
 
   return (
     <main className="min-h-screen bg-canvas text-ink">
-      <PageToolbar title="Mes commandes" description="Historique et suivi de vos livraisons" />
+      <PageToolbar
+        title="Mes commandes"
+        description="Historique et suivi de vos livraisons"
+        meta={<MyOrderStatusBadge variant="compact" />}
+      />
 
       <section className="py-10 lg:py-14">
         <div className="mx-auto max-w-4xl px-6 lg:px-10">

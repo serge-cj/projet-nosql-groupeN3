@@ -5,6 +5,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 
+const VEHICLE_TYPES = [
+  { value: 'MOTORCYCLE', label: 'Moto' },
+  { value: 'SCOOTER', label: 'Scooter' },
+  { value: 'BICYCLE', label: 'Vélo' },
+  { value: 'CAR', label: 'Voiture' },
+];
+
 export default function DelivererRegisterPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -12,8 +19,9 @@ export default function DelivererRegisterPage() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
-  const [vehicleType, setVehicleType] = useState('');
-  const [deliveryZone, setDeliveryZone] = useState('');
+  const [vehicleType, setVehicleType] = useState('MOTORCYCLE');
+  const [licensePlate, setLicensePlate] = useState('');
+  const [idCardNumber, setIdCardNumber] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -27,19 +35,29 @@ export default function DelivererRegisterPage() {
         email,
         password,
         role: 'DELIVERER',
-        profile: {
-          firstName,
-          lastName,
-          phone,
-          extra: {
-            vehicleType,
-            deliveryZone,
-          },
-        },
+        profile: { firstName, lastName, phone },
       });
 
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
+
+      // Nous créons le profil livreur (véhicule, pièce d'identité) associé à ce compte
+      try {
+        await api.post('/deliverers', {
+          idCardNumber,
+          vehicleType,
+          licensePlate,
+        });
+      } catch (e: any) {
+        const message =
+          e.response?.data?.error ||
+          e.response?.data?.message ||
+          'Impossible de créer votre profil livreur. Vérifiez les champs et réessayez.';
+        setError(message);
+        setLoading(false);
+        return;
+      }
+
       router.push('/deliverer/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message ?? "Erreur lors de l'inscription");
@@ -123,25 +141,41 @@ export default function DelivererRegisterPage() {
               </label>
 
               <label className="block space-y-2">
-                <span className="text-sm font-semibold text-ink">Type de véhicule</span>
+                <span className="text-sm font-semibold text-ink">Numéro de carte d&apos;identité</span>
                 <input
                   type="text"
-                  value={vehicleType}
-                  onChange={(event) => setVehicleType(event.target.value)}
+                  value={idCardNumber}
+                  onChange={(event) => setIdCardNumber(event.target.value)}
                   className="input-field"
-                  placeholder="Moto, Vélo, Voiture..."
+                  placeholder="Numéro CNI"
                   required
                 />
               </label>
 
               <label className="block space-y-2">
-                <span className="text-sm font-semibold text-ink">Zone de livraison</span>
+                <span className="text-sm font-semibold text-ink">Type de véhicule</span>
+                <select
+                  value={vehicleType}
+                  onChange={(event) => setVehicleType(event.target.value)}
+                  className="input-field"
+                  required
+                >
+                  {VEHICLE_TYPES.map((vehicle) => (
+                    <option key={vehicle.value} value={vehicle.value}>
+                      {vehicle.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block space-y-2">
+                <span className="text-sm font-semibold text-ink">Plaque d&apos;immatriculation</span>
                 <input
                   type="text"
-                  value={deliveryZone}
-                  onChange={(event) => setDeliveryZone(event.target.value)}
+                  value={licensePlate}
+                  onChange={(event) => setLicensePlate(event.target.value)}
                   className="input-field"
-                  placeholder="Zone de livraison"
+                  placeholder="Plaque d'immatriculation"
                   required
                 />
               </label>

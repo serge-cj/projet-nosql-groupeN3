@@ -2,6 +2,7 @@ const express = require('express');
 const {
   listRestaurants,
   listOpenRestaurantsWithAvailability,
+  searchDishes,
   getRestaurantById,
   nearbyRestaurants,
   updateRestaurant,
@@ -33,6 +34,7 @@ const router = express.Router();
 router.get('/', listRestaurants);
 router.get('/open', listOpenRestaurantsWithAvailability);
 router.get('/nearby', nearbyRestaurants);
+router.get('/dishes/search', searchDishes);
 
 // Nous permettons la création d'un restaurant pour un vendeur authentifié (onboarding)
 router.post('/', jwtAuth, authorize('VENDOR', 'ADMIN'), validateRequest(createRestaurantSchema), createRestaurant);

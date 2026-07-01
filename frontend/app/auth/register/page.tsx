@@ -94,7 +94,7 @@ export default function RegisterPage() {
       });
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
-      router.push('/restaurants');
+      router.push('/');
     } catch (err: any) {
       setError(err.response?.data?.message ?? "Erreur lors de l'inscription");
     } finally {

@@ -7,6 +7,8 @@ const TTL = {
   RESTAURANT_DETAIL: 3600, // nous fixons cette durée à 1 heure
   ORDERS: 300, // nous fixons cette durée à 5 minutes
   ORDER_DETAIL: 300, // nous fixons cette durée à 5 minutes
+  DISHES: 3600, // nous fixons cette durée à 1 heure
+  LIVE_ORDER_STATS: 30, // nous fixons cette durée courte pour rester "en direct"
 };
 
 /**
@@ -137,6 +139,24 @@ function getRestaurantCacheKey(district = null, isOpen = null, q = null, page = 
 }
 
 /**
+ * Nous générons une clé de cache pour une recherche (ou un parcours) de plats.
+ * @param {string} q - Recherche textuelle sur le nom du plat (optionnel, vide = parcours)
+ * @param {string} district - District (optionnel)
+ * @param {string} category - Catégorie de plat (optionnel)
+ * @param {number|string} page - Page demandée
+ * @param {number|string} limit - Nombre d'éléments par page
+ * @returns {string} - Clé de cache
+ */
+function getDishSearchCacheKey(q, district = null, category = null, page = 1, limit = 10) {
+  const parts = ['dishes', `q:${q || ''}`];
+  if (district) parts.push(`district:${district}`);
+  if (category) parts.push(`category:${category}`);
+  parts.push(`page:${page}`);
+  parts.push(`limit:${limit}`);
+  return parts.join(':');
+}
+
+/**
  * Nous générons une clé de cache pour un restaurant spécifique.
  * @param {string} restaurantId - ID du restaurant
  * @returns {string} - Clé de cache
@@ -173,6 +193,7 @@ module.exports = {
   del,
   TTL,
   getRestaurantCacheKey,
+  getDishSearchCacheKey,
   getRestaurantDetailCacheKey,
   getOrderCacheKey,
   getOrderDetailCacheKey,

@@ -133,13 +133,13 @@ export default function Header() {
 
         <form onSubmit={handleSearchSubmit} className="hidden min-w-0 flex-1 md:block md:max-w-md lg:max-w-lg">
           <label className="relative flex items-center">
-            <span className="sr-only">Chercher un restaurant</span>
+            <span className="sr-only">Chercher un plat</span>
             <IconSearch className="pointer-events-none absolute left-3 h-4 w-4 text-ink-muted" />
             <input
               type="search"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Chercher un restaurant…"
+              placeholder="Chercher un plat…"
               className="input-field w-full py-2.5 pl-10 pr-16 text-sm"
             />
             <kbd className="pointer-events-none absolute right-3 hidden rounded border border-divider bg-surface-1 px-1.5 py-0.5 text-[10px] font-medium text-ink-muted lg:inline">
@@ -211,7 +211,7 @@ export default function Header() {
                 {isOpen ? (
                   <div
                     role="menu"
-                    className="absolute right-0 mt-2 w-48 rounded-card border border-divider bg-canvas shadow-card"
+                    className="animate-dropdown-in absolute right-0 mt-2 w-48 rounded-card border border-divider bg-canvas shadow-card"
                   >
                     <Link
                       href="/orders"

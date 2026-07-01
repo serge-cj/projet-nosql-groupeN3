@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
 import { useRouter } from 'next/navigation';
 import PageToolbar from '../../components/PageToolbar';
+import LiveStatsBadge from '../../components/LiveStatsBadge';
 import api from '@/lib/api';
 
 interface DeliveryOrder {
@@ -26,7 +27,8 @@ export default function DelivererDashboard() {
   const [orders, setOrders] = useState<DeliveryOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [user, setUser] = useState<{ _id?: string; email: string; role: string } | null>(null);
+  const [actingOrderId, setActingOrderId] = useState<string | null>(null);
+  const [user, setUser] = useState<{ id?: string; _id?: string; email: string; role: string } | null>(null);
 
   function getSocketUrl() {
     const configuredSocketUrl = process.env.NEXT_PUBLIC_SOCKET_URL;
@@ -58,11 +60,14 @@ export default function DelivererDashboard() {
     async function fetchDeliveries() {
       setLoading(true);
       try {
-        // Nous récupérons les commandes prêtes à être livrées ou en cours de livraison
+        // GET /orders renvoie déjà, pour un livreur, ses propres courses
+        // (en attente d'acceptation ou en cours) grâce au filtre côté backend
         const response = await api.get('/orders');
         const allOrders: DeliveryOrder[] = response.data.orders ?? response.data ?? [];
         const relevant = allOrders.filter(
-          (o) => o.status === 'READY_FOR_DELIVERY' || o.status === 'DELIVERY_IN_PROGRESS'
+          (o) =>
+            (o.status === 'READY_FOR_DELIVERY') ||
+            (o.status === 'DELIVERY_IN_PROGRESS')
         );
         setOrders(relevant);
       } catch (err: any) {
@@ -91,70 +96,135 @@ export default function DelivererDashboard() {
     };
   }, [router]);
 
+  const availableOrders = orders.filter((o) => o.status === 'READY_FOR_DELIVERY');
+  const inProgressOrders = orders.filter((o) => o.status === 'DELIVERY_IN_PROGRESS');
+
   async function handleAccept(orderId: string) {
+    setActingOrderId(orderId);
+    setError('');
     try {
-      await api.post(`/orders/${orderId}/assign`, { delivererId: user?._id ?? '' });
-      // Nous retirons la commande de la liste
-      setOrders((prev) => prev.filter((o) => o._id !== orderId));
+      await api.post(`/orders/${orderId}/assign`, { delivererId: user?.id ?? user?._id ?? '' });
+      setOrders((prev) =>
+        prev.map((o) => (o._id === orderId ? { ...o, status: 'DELIVERY_IN_PROGRESS' } : o))
+      );
     } catch {
       setError("Impossible d'accepter cette livraison.");
+    } finally {
+      setActingOrderId(null);
     }
+  }
+
+  async function handleMarkDelivered(orderId: string) {
+    setActingOrderId(orderId);
+    setError('');
+    try {
+      await api.patch(`/orders/${orderId}/status`, { status: 'DELIVERED' });
+      setOrders((prev) => prev.filter((o) => o._id !== orderId));
+    } catch {
+      setError('Impossible de marquer cette commande comme livrée.');
+    } finally {
+      setActingOrderId(null);
+    }
+  }
+
+  function renderOrderCard(order: DeliveryOrder, action: 'accept' | 'deliver') {
+    const isActing = actingOrderId === order._id;
+    return (
+      <div key={order._id} className="surface-card p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <p className="font-semibold text-ink">
+              {order.restaurant_id && typeof order.restaurant_id !== 'string'
+                ? order.restaurant_id.name
+                : 'Restaurant'}
+            </p>
+            <p className="mt-1 text-sm text-ink-muted">
+              {order.deliveryInfo?.recipientName} · {order.deliveryInfo?.address?.district ?? '—'}
+            </p>
+            {order.items && (
+              <p className="mt-2 text-sm text-ink-muted">
+                {order.items.length} article{order.items.length > 1 ? 's' : ''}
+              </p>
+            )}
+          </div>
+          <div className="shrink-0 text-right">
+            <p className="text-lg font-semibold tabular-nums text-ink">
+              {order.pricing?.total?.toLocaleString()} {order.pricing?.currency || 'FCFA'}
+            </p>
+            {action === 'accept' ? (
+              <button
+                onClick={() => handleAccept(order._id)}
+                className="btn-primary mt-3"
+                disabled={isActing}
+              >
+                {isActing ? '⏳' : 'Accepter'}
+              </button>
+            ) : (
+              <button
+                onClick={() => handleMarkDelivered(order._id)}
+                className="btn-primary mt-3"
+                disabled={isActing}
+              >
+                {isActing ? '⏳' : 'Marquer comme livrée'}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
     <main className="min-h-screen bg-canvas text-ink">
-      <PageToolbar title="Espace livreur" description="Courses disponibles et livraisons en cours" />
+      <PageToolbar
+        title="Espace livreur"
+        description="Courses disponibles et livraisons en cours"
+        meta={<LiveStatsBadge variant="compact" />}
+      />
 
       <section className="py-10 lg:py-14">
-        <div className="mx-auto max-w-4xl px-6 lg:px-10">
+        <div className="mx-auto max-w-4xl px-6 lg:px-10 space-y-12">
           {error && (
-            <div className="mb-6 rounded-card border border-error/30 bg-error/5 p-4 text-sm text-error">{error}</div>
+            <div className="rounded-card border border-error/30 bg-error/5 p-4 text-sm text-error">{error}</div>
           )}
 
           {loading ? (
             <div className="surface-card p-12 text-center text-ink-muted">
               Chargement des livraisons...
             </div>
-          ) : orders.length === 0 ? (
-            <div className="surface-card p-12 text-center">
-              <p className="font-display text-xl font-semibold text-ink">Aucune course disponible</p>
-              <p className="mt-2 text-ink-muted">Revenez plus tard pour voir les nouvelles livraisons.</p>
-            </div>
           ) : (
-            <div className="space-y-4">
-              {orders.map((order) => (
-                <div key={order._id} className="surface-card p-6">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <p className="font-semibold text-ink">
-                        {order.restaurant_id && typeof order.restaurant_id !== 'string'
-                          ? order.restaurant_id.name
-                          : 'Restaurant'}
-                      </p>
-                      <p className="mt-1 text-sm text-ink-muted">
-                        {order.deliveryInfo?.recipientName} · {order.deliveryInfo?.address?.district ?? '—'}
-                      </p>
-                      {order.items && (
-                        <p className="mt-2 text-sm text-ink-muted">
-                          {order.items.length} article{order.items.length > 1 ? 's' : ''}
-                        </p>
-                      )}
-                    </div>
-                    <div className="shrink-0 text-right">
-                      <p className="text-lg font-semibold tabular-nums text-ink">
-                        {order.pricing?.total?.toLocaleString()} {order.pricing?.currency || 'FCFA'}
-                      </p>
-                      <button
-                        onClick={() => handleAccept(order._id)}
-                        className="btn-primary mt-3"
-                      >
-                        Accepter
-                      </button>
-                    </div>
+            <>
+              <div>
+                <h2 className="mb-4 font-display text-xl font-semibold text-ink">
+                  Mes livraisons en cours ({inProgressOrders.length})
+                </h2>
+                {inProgressOrders.length === 0 ? (
+                  <div className="surface-card p-8 text-center">
+                    <p className="text-ink-muted">Aucune livraison en cours.</p>
                   </div>
-                </div>
-              ))}
-            </div>
+                ) : (
+                  <div className="space-y-4">
+                    {inProgressOrders.map((order) => renderOrderCard(order, 'deliver'))}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <h2 className="mb-4 font-display text-xl font-semibold text-ink">
+                  Courses disponibles ({availableOrders.length})
+                </h2>
+                {availableOrders.length === 0 ? (
+                  <div className="surface-card p-12 text-center">
+                    <p className="font-display text-xl font-semibold text-ink">Aucune course disponible</p>
+                    <p className="mt-2 text-ink-muted">Revenez plus tard pour voir les nouvelles livraisons.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {availableOrders.map((order) => renderOrderCard(order, 'accept'))}
+                  </div>
+                )}
+              </div>
+            </>
           )}
         </div>
       </section>

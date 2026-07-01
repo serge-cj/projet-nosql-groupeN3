@@ -1,6 +1,7 @@
 const Deliverer = require('../models/Deliverer');
 const Commande = require('../models/Commande');
 const Restaurant = require('../models/Restaurant');
+const User = require('../models/User');
 const { logger } = require('../utils/logger');
 const AppError = require('../utils/AppError');
 const { emitToRoom } = require('../socket');
@@ -60,6 +61,51 @@ async function trackActiveOrderDelivery(delivererId, lat, lng) {
   });
 
   return activeOrder._id;
+}
+
+async function createDeliverer(req, res, next) {
+  try {
+    const userId = req.user.id;
+    const { idCardNumber, idCardExpiry, vehicleType, licensePlate, color } = req.validated.body;
+
+    // Nous renvoyons le profil livreur existant plutôt que d'échouer si l'inscription a déjà été faite
+    const existing = await Deliverer.findOne({ user_id: userId });
+    if (existing) {
+      return res.status(200).json({ deliverer: existing });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) return next(AppError.notFound('Utilisateur introuvable', { userId }));
+
+    const deliverer = new Deliverer({
+      _id: userId,
+      user_id: userId,
+      personalInfo: {
+        firstName: user.profile.firstName,
+        lastName: user.profile.lastName,
+        phone: user.profile.phone,
+        email: user.email,
+        idCardNumber,
+        idCardExpiry,
+      },
+      vehicleInfo: {
+        type: vehicleType,
+        licensePlate,
+        color,
+      },
+      isActive: true,
+      isAvailable: true,
+    });
+
+    await deliverer.save();
+
+    logger.debug('Profil livreur créé via onboarding', { delivererId: deliverer._id });
+
+    res.status(201).json({ deliverer });
+  } catch (err) {
+    logger.error('Erreur création livreur', { message: err.message, stack: err.stack });
+    next(err);
+  }
 }
 
 async function listAvailableDeliverers(req, res, next) {
@@ -160,6 +206,7 @@ async function updateDelivererLocation(req, res, next) {
 }
 
 module.exports = {
+  createDeliverer,
   listAvailableDeliverers,
   getDeliverer,
   updateDelivererLocation,

@@ -22,11 +22,12 @@ export default function LoginPage() {
       localStorage.setItem('user', JSON.stringify(response.data.user));
 
       const dashboardByRole: Record<string, string> = {
+        CUSTOMER: '/',
         VENDOR: '/restaurant/dashboard',
         DELIVERER: '/deliverer/dashboard',
         ADMIN: '/admin',
       };
-      router.push(dashboardByRole[response.data.user.role] ?? '/restaurants');
+      router.push(dashboardByRole[response.data.user.role] ?? '/');
     } catch (err: any) {
       setError(err.response?.data?.message ?? 'E-mail ou mot de passe incorrect');
     } finally {

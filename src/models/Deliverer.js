@@ -51,12 +51,13 @@ const delivererSchema = new mongoose.Schema(
       insuranceExpiry: Date,
     },
 
-    // Nous modélisons ici la position du livreur en temps réel
+    // Nous modélisons ici la position du livreur en temps réel. Nous ne mettons pas de
+    // valeur par défaut sur `type` : tant qu'aucune position GPS n'a été envoyée, ce champ
+    // doit rester absent (un sous-document { type: 'Point' } sans coordonnées casse l'index 2dsphere).
     currentLocation: {
       type: {
         type: String,
         enum: ['Point'],
-        default: 'Point',
       },
       coordinates: [Number], // nous stockons les coordonnées au format [longitude, latitude]
       lastUpdated: Date,

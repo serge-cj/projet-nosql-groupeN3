@@ -88,6 +88,21 @@ h1, h2, h3, h4, h5, h6 {
   to { stroke-dashoffset: 0; }
 }
 
+@keyframes marquee-vertical {
+  from { transform: translateY(0); }
+  to { transform: translateY(-50%); }
+}
+
+@keyframes page-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes dropdown-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -165,6 +180,23 @@ h1, h2, h3, h4, h5, h6 {
     stroke-dasharray: 340;
     stroke-dashoffset: 340;
     animation: draw-underline 0.9s var(--ease-in-out) both;
+  }
+
+  .animate-marquee-vertical {
+    animation: marquee-vertical 32s linear infinite;
+  }
+
+  .animate-marquee-vertical-reverse {
+    animation: marquee-vertical 32s linear infinite reverse;
+  }
+
+  .animate-page-in {
+    animation: page-in var(--dur-medium) var(--ease-in-out) both;
+  }
+
+  .animate-dropdown-in {
+    animation: dropdown-in var(--dur-short) var(--ease-out) both;
+    transform-origin: top right;
   }
 
   .card-spotlight {

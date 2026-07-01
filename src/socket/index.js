@@ -10,7 +10,7 @@ let io = null;
  * @param {Object} httpServer - Serveur HTTP Express
  * @returns {Object} - Instance Socket.io
  */
-function initializeSocket(httpServer) {
+async function initializeSocket(httpServer) {
   io = new Server(httpServer, {
     cors: {
       origin: process.env.FRONTEND_URL || 'http://localhost:3000',
@@ -21,14 +21,24 @@ function initializeSocket(httpServer) {
     pingInterval: 25000,
   });
 
-  // Nous utilisons l'adaptateur Redis lorsqu'il est disponible afin de permettre la mise à l'échelle horizontale
+  // Nous utilisons l'adaptateur Redis lorsqu'il est disponible afin de permettre la mise à l'échelle horizontale.
+  // Les clients dupliqués ne sont pas connectés automatiquement : sans connect(), le premier publish
+  // échoue (ou réussit une fois puis casse), ce qui faisait planter tout le process Node au moindre
+  // émission Socket.io suivante. Nous repassons sur l'adaptateur mémoire en cas d'échec.
   if (isRedisConnected()) {
-    const redisClient = getRedisClient();
-    const pubClient = redisClient.duplicate();
-    const subClient = redisClient.duplicate();
+    try {
+      const redisClient = getRedisClient();
+      const pubClient = redisClient.duplicate();
+      const subClient = redisClient.duplicate();
+      await Promise.all([pubClient.connect(), subClient.connect()]);
 
-    io.adapter(createAdapter(pubClient, subClient));
-    logger.info('Socket.io Redis adapter configuré');
+      io.adapter(createAdapter(pubClient, subClient));
+      logger.info('Socket.io Redis adapter configuré');
+    } catch (err) {
+      logger.error('Échec de configuration de l’adaptateur Redis pour Socket.io, utilisation de l’adaptateur mémoire', {
+        message: err.message,
+      });
+    }
   }
 
   // Nous définissons ici le middleware d'authentification Socket.io

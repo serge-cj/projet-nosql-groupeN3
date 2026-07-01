@@ -16,7 +16,7 @@ const http = require('http');
     const server = http.createServer(app);
     
     // Nous initialisons Socket.io
-    initializeSocket(server);
+    await initializeSocket(server);
 
     server.on('error', (error) => {
       if (error.syscall !== 'listen') {

@@ -46,9 +46,30 @@ interface RestaurantsResponse {
   pagination: Pagination;
 }
 
+interface Dish {
+  dishId: string;
+  name: string;
+  description?: string;
+  price: number;
+  currency?: string;
+  category?: string;
+  isAvailable?: boolean;
+  quantity?: number;
+  image?: string;
+  restaurantId: string;
+  restaurantName: string;
+  district?: string;
+}
+
+interface DishSearchResponse {
+  dishes: Dish[];
+  pagination: Pagination;
+}
+
 export default function RestaurantsPageClient() {
   const searchParams = useSearchParams();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [dishes, setDishes] = useState<Dish[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isPaginating, setIsPaginating] = useState(false);
@@ -91,31 +112,53 @@ export default function RestaurantsPageClient() {
       setIsLoading(true);
     }
 
-    async function fetchRestaurants() {
+    async function fetchData() {
       setError('');
+      const query = debouncedSearch.trim();
+
       try {
-        const params = new URLSearchParams({
-          page: String(currentPage),
-          limit: String(PAGE_LIMIT),
-        });
-        const query = debouncedSearch.trim();
+        if (query) {
+          // Nous cherchons un plat précis plutôt qu'un restaurant
+          const params = new URLSearchParams({
+            q: query,
+            page: String(currentPage),
+            limit: String(PAGE_LIMIT),
+          });
+          if (selectedDistrict) params.set('district', selectedDistrict);
 
-        if (query) params.set('q', query);
-        if (selectedDistrict) params.set('district', selectedDistrict);
-        if (selectedCuisine) params.set('cuisine', selectedCuisine);
-        if (selectedNeighborhood) params.set('district', selectedNeighborhood);
-        if (isOpen) params.set('isOpen', isOpen);
-        if (selectedBadge) params.set('badge', selectedBadge);
+          const response = await fetch(`${API_URL}/restaurants/dishes/search?${params.toString()}`, {
+            signal: controller.signal,
+          });
+          if (!response.ok) {
+            throw new Error('Impossible de charger les plats.');
+          }
+          const data = (await response.json()) as DishSearchResponse;
+          setDishes(data.dishes);
+          setRestaurants([]);
+          setPagination(data.pagination);
+        } else {
+          const params = new URLSearchParams({
+            page: String(currentPage),
+            limit: String(PAGE_LIMIT),
+          });
 
-        const response = await fetch(`${API_URL}/restaurants?${params.toString()}`, {
-          signal: controller.signal,
-        });
-        if (!response.ok) {
-          throw new Error('Impossible de charger les restaurants.');
+          if (selectedDistrict) params.set('district', selectedDistrict);
+          if (selectedCuisine) params.set('cuisine', selectedCuisine);
+          if (selectedNeighborhood) params.set('district', selectedNeighborhood);
+          if (isOpen) params.set('isOpen', isOpen);
+          if (selectedBadge) params.set('badge', selectedBadge);
+
+          const response = await fetch(`${API_URL}/restaurants?${params.toString()}`, {
+            signal: controller.signal,
+          });
+          if (!response.ok) {
+            throw new Error('Impossible de charger les restaurants.');
+          }
+          const data = (await response.json()) as RestaurantsResponse;
+          setRestaurants(data.restaurants);
+          setDishes([]);
+          setPagination(data.pagination);
         }
-        const data = (await response.json()) as RestaurantsResponse;
-        setRestaurants(data.restaurants);
-        setPagination(data.pagination);
       } catch (err) {
         if (err instanceof DOMException && err.name === 'AbortError') return;
         setError(err instanceof Error ? err.message : 'Erreur réseau');
@@ -128,7 +171,7 @@ export default function RestaurantsPageClient() {
       }
     }
 
-    fetchRestaurants();
+    fetchData();
 
     return () => controller.abort();
   }, [debouncedSearch, selectedDistrict, isOpen, selectedBadge, currentPage, initialized]);
@@ -172,7 +215,8 @@ export default function RestaurantsPageClient() {
     setCurrentPage(1);
   }
 
-  const totalRestaurants = pagination?.total ?? restaurants.length;
+  const isSearchMode = debouncedSearch.trim().length > 0;
+  const totalRestaurants = pagination?.total ?? (isSearchMode ? dishes.length : restaurants.length);
   const bestOfferRestaurant = restaurants.find((restaurant) => restaurant.promo || restaurant.isPlus);
 
   return (
@@ -300,7 +344,9 @@ export default function RestaurantsPageClient() {
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="rounded-card border border-divider bg-surface-1 p-4 text-sm">
                 <p className="text-ink-muted">Résultats</p>
-                <p className="mt-2 text-lg font-semibold text-ink">{totalRestaurants} restaurants</p>
+                <p className="mt-2 text-lg font-semibold text-ink">
+                  {totalRestaurants} {isSearchMode ? 'plats' : 'restaurants'}
+                </p>
               </div>
               <div className="rounded-card border border-divider bg-surface-1 p-4 text-sm">
                 <p className="text-ink-muted">Quartier actif</p>
@@ -308,7 +354,9 @@ export default function RestaurantsPageClient() {
               </div>
               <div className="rounded-card border border-divider bg-surface-1 p-4 text-sm">
                 <p className="text-ink-muted">Meilleure offre</p>
-                {bestOfferRestaurant ? (
+                {isSearchMode ? (
+                  <p className="mt-2 text-lg font-semibold text-ink">Recherche de plats en cours</p>
+                ) : bestOfferRestaurant ? (
                   <div className="mt-2 space-y-2">
                     <p className="text-lg font-semibold text-ink">{bestOfferRestaurant.name}</p>
                     {bestOfferRestaurant.promo ? (
@@ -339,13 +387,98 @@ export default function RestaurantsPageClient() {
             </div>
           ) : error ? (
             <div className="rounded-card border border-error/30 bg-error/5 p-12 text-center text-error">{error}</div>
-          ) : restaurants.length === 0 ? (
+          ) : (isSearchMode ? dishes.length === 0 : restaurants.length === 0) ? (
             <div className="surface-card p-12 text-center">
-              <p className="text-ink-muted">Aucun restaurant ne correspond à votre recherche.</p>
+              <p className="text-ink-muted">
+                {isSearchMode ? 'Aucun plat ne correspond à votre recherche.' : 'Aucun restaurant ne correspond à votre recherche.'}
+              </p>
               <button type="button" onClick={resetFilters} className="mt-4 text-sm font-semibold text-brand hover:underline">
                 Réinitialiser les filtres
               </button>
             </div>
+          ) : isSearchMode ? (
+            <>
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {dishes.map((dish, index) => (
+                  <Link key={dish.dishId} href={`/restaurants/${dish.restaurantId}?dish=${dish.dishId}`}>
+                    <article
+                      className="group flex flex-col overflow-hidden rounded-card border border-divider bg-surface-1 shadow-soft transition duration-300 hover:-translate-y-0.5 hover:border-brand hover:shadow-lg"
+                      style={{ animationDelay: `${index * 0.06}s` }}
+                    >
+                      <div className="relative h-44 overflow-hidden bg-soft">
+                        {dish.image ? (
+                          <Image
+                            src={dish.image}
+                            alt={`Photo de ${dish.name}`}
+                            fill
+                            sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                            className="object-cover transition duration-500 group-hover:scale-105"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(62,153,255,0.16),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(255,168,0,0.18),transparent_30%)]" />
+                        )}
+
+                        {dish.category && (
+                          <div className="absolute inset-x-0 top-0 flex justify-between p-4">
+                            <span className="rounded-pill bg-forest-100 px-3 py-1 text-xs font-semibold text-forest-900">{dish.category}</span>
+                          </div>
+                        )}
+
+                        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-canvas/95 to-transparent" />
+                      </div>
+
+                      <div className="flex flex-1 flex-col space-y-4 p-5">
+                        <div className="min-h-[5.5rem]">
+                          <h2 className="font-display text-lg font-semibold text-ink transition-colors group-hover:text-brand">
+                            {dish.name}
+                          </h2>
+                          <p className="mt-2 text-sm text-ink-muted">
+                            Chez {dish.restaurantName}
+                            {dish.district ? ` · ${dish.district}` : ''}
+                          </p>
+                        </div>
+
+                        <div className="grid gap-2 text-sm text-ink-muted">
+                          <div className="flex items-center justify-between gap-2 rounded-pill border border-divider bg-surface-1 px-3 py-2">
+                            <span className="font-mono font-semibold text-mango-700">
+                              {dish.price} {dish.currency || 'FCFA'}
+                            </span>
+                            <span className="text-xs text-ink-muted">{dish.isAvailable ? 'Disponible' : 'Indisponible'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  </Link>
+                ))}
+              </div>
+
+              {pagination && pagination.totalPages > 1 ? (
+                <div className="mt-10 flex flex-col items-center justify-between gap-4 surface-card p-4 text-sm text-ink-muted sm:flex-row">
+                  <span>
+                    Page <strong className="text-ink">{pagination.page}</strong> sur{' '}
+                    <strong className="text-ink">{pagination.totalPages}</strong>
+                  </span>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))}
+                      disabled={!pagination.hasPrev || isPaginating}
+                      className="btn-secondary px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {isPaginating ? '…' : 'Précédent'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage((page) => page + 1)}
+                      disabled={!pagination.hasNext || isPaginating}
+                      className="btn-primary px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {isPaginating ? '…' : 'Suivant'}
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+            </>
           ) : (
             <>
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
