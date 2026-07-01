@@ -7,6 +7,7 @@ import api from '@/lib/api';
 import CartDrawer from '@/app/components/CartDrawer';
 import { IconCheck } from '@/app/components/icons';
 import { loadCart, saveCart, addToCart as cartHelperAddToCart, getCartTotal } from '@/lib/cartHelper';
+import { formatAmount } from '@/lib/format';
 
 interface Props {
   params: { id: string };
@@ -321,7 +322,7 @@ export default function RestaurantDetailClient({ params }: Props) {
 
                             <div className="flex shrink-0 flex-col items-start gap-3 sm:items-end">
                               <span className="text-lg font-semibold tabular-nums text-ink">
-                                {dish.price.toLocaleString()}{' '}
+                                {formatAmount(dish.price)}{' '}
                                 <span className="font-mono text-sm">{dish.currency || 'FCFA'}</span>
                               </span>
                               <button
@@ -389,7 +390,7 @@ export default function RestaurantDetailClient({ params }: Props) {
       >
         <div>
           <p className="text-sm font-semibold text-ink">{totalCartItems} article{totalCartItems !== 1 ? 's' : ''}</p>
-          <p className="text-sm tabular-nums text-ink-muted">{currentCartTotal.toLocaleString()} FCFA</p>
+          <p className="text-sm tabular-nums text-ink-muted">{formatAmount(currentCartTotal)} FCFA</p>
         </div>
         <button
           type="button"

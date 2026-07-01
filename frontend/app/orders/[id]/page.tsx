@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
 import api from '@/lib/api';
+import { formatAmount } from '@/lib/format';
 
 interface OrderProps {
   params: { id: string };
@@ -142,7 +143,7 @@ function getErrorMessage(error: unknown) {
 
 function formatMoney(value?: number, currency = 'FCFA') {
   if (typeof value !== 'number') return '—';
-  return `${value.toLocaleString()} ${currency}`;
+  return `${formatAmount(value)} ${currency}`;
 }
 
 function formatDate(value?: string) {

@@ -1,13 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { io, type Socket } from 'socket.io-client';
 export const dynamic = 'force-dynamic';
 import PageToolbar from '../components/PageToolbar';
 import { OrderCardSkeleton } from '../components/Skeleton';
 import MyOrderStatusBadge from '../components/MyOrderStatusBadge';
 import api from '@/lib/api';
+import { formatAmount } from '@/lib/format';
 
 type OrderStatus =
   | 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'READY_FOR_DELIVERY'
@@ -39,6 +41,40 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const fetchOrders = useCallback(async () => {
+    setLoading(true);
+    try {
+      // Nous vérifions si des identifiants de commandes spécifiques sont fournis via le paramètre ?ids
+      const urlSearch = new URLSearchParams(window.location.search);
+      const idsParam = urlSearch.get('ids');
+      if (idsParam) {
+        // Cas d'une validation multi-commandes : nous récupérons les commandes spécifiques par identifiant
+        const orderIds = idsParam.split(',').filter(id => id.trim());
+        const responses = await Promise.all(
+          orderIds.map(id => api.get(`/orders/${id.trim()}`))
+        );
+        const fetchedOrders = responses.map(res => res.data.order ?? res.data).filter(Boolean);
+        setOrders(fetchedOrders);
+      } else {
+        // Nous récupérons l'ensemble des commandes
+        const response = await api.get('/orders');
+        setOrders(response.data.orders ?? response.data ?? []);
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message ?? 'Impossible de charger vos commandes.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  function getSocketUrl() {
+    const configuredSocketUrl = process.env.NEXT_PUBLIC_SOCKET_URL;
+    if (configuredSocketUrl) return configuredSocketUrl;
+
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+    return apiUrl.replace(/\/api\/?$/, '');
+  }
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -46,34 +82,20 @@ export default function OrdersPage() {
       return;
     }
 
-    async function fetchOrders() {
-      setLoading(true);
-      try {
-        // Nous vérifions si des identifiants de commandes spécifiques sont fournis via le paramètre ?ids
-        const urlSearch = new URLSearchParams(window.location.search);
-        const idsParam = urlSearch.get('ids');
-        if (idsParam) {
-          // Cas d'une validation multi-commandes : nous récupérons les commandes spécifiques par identifiant
-          const orderIds = idsParam.split(',').filter(id => id.trim());
-          const responses = await Promise.all(
-            orderIds.map(id => api.get(`/orders/${id.trim()}`))
-          );
-          const fetchedOrders = responses.map(res => res.data.order ?? res.data).filter(Boolean);
-          setOrders(fetchedOrders);
-        } else {
-          // Nous récupérons l'ensemble des commandes
-          const response = await api.get('/orders');
-          setOrders(response.data.orders ?? response.data ?? []);
-        }
-      } catch (err: any) {
-        setError(err.response?.data?.message ?? 'Impossible de charger vos commandes.');
-      } finally {
-        setLoading(false);
-      }
-    }
+    void fetchOrders();
 
-    fetchOrders();
-  }, [router]);
+    const socket: Socket = io(getSocketUrl(), {
+      auth: { token },
+      transports: ['websocket'],
+    });
+
+    socket.on('order:status:updated', () => void fetchOrders());
+    socket.on('order:deliverer:assigned', () => void fetchOrders());
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [router, fetchOrders]);
 
   function formatDate(value?: string) {
     if (!value) return '—';
@@ -140,7 +162,7 @@ export default function OrdersPage() {
                         {STATUS_LABELS[order.status]}
                       </span>
                       <p className="mt-2 text-sm font-semibold tabular-nums text-ink">
-                        {order.pricing?.total?.toLocaleString()} {order.pricing?.currency || 'FCFA'}
+                        {formatAmount(order.pricing?.total)} {order.pricing?.currency || 'FCFA'}
                       </p>
                     </div>
                   </div>

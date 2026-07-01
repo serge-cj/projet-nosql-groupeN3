@@ -164,6 +164,14 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: var(--shadow-card);
   }
 
+  /* Verre translucide façon matériaux Apple (barres de navigation, feuilles, menus) :
+     à réserver au "chrome" flottant au-dessus du contenu, pas aux cartes de contenu. */
+  .surface-glass {
+    background-color: color-mix(in oklch, var(--color-canvas) 72%, transparent);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+  }
+
   .animate-float {
     animation: float 3s ease-in-out infinite;
   }

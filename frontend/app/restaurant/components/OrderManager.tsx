@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import api from '@/lib/api';
+import { formatAmount } from '@/lib/format';
 
 interface OrderItem {
   dishName: string;
@@ -291,7 +292,7 @@ export default function OrderManager({ orders, onUpdate }: OrderManagerProps) {
                       </div>
                       <div className="shrink-0 text-right">
                         <p className="font-semibold tabular-nums text-ink">
-                          {order.pricing?.total?.toLocaleString()} {order.pricing?.currency || 'FCFA'}
+                          {formatAmount(order.pricing?.total)} {order.pricing?.currency || 'FCFA'}
                         </p>
                         {STATUS_FLOW[order.status] && (
                           <button
@@ -397,7 +398,7 @@ export default function OrderManager({ orders, onUpdate }: OrderManagerProps) {
                             <div key={i} className="flex justify-between text-sm">
                               <span className="text-ink">{item.quantity}× {item.dishName}</span>
                               <span className="text-ink-muted tabular-nums">
-                                {((item.unitPrice || 0) * item.quantity).toLocaleString()} FCFA
+                                {formatAmount((item.unitPrice || 0) * item.quantity)} FCFA
                               </span>
                             </div>
                           ))}
@@ -408,19 +409,19 @@ export default function OrderManager({ orders, onUpdate }: OrderManagerProps) {
                       <div className="space-y-1 border-t border-divider pt-3 text-sm">
                         <div className="flex justify-between">
                           <span className="text-ink-muted">Sous-total</span>
-                          <span className="text-ink">{order.pricing?.subtotal?.toLocaleString()} FCFA</span>
+                          <span className="text-ink">{formatAmount(order.pricing?.subtotal)} FCFA</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-ink-muted">Livraison</span>
-                          <span className="text-ink">{order.pricing?.deliveryFee?.toLocaleString()} FCFA</span>
+                          <span className="text-ink">{formatAmount(order.pricing?.deliveryFee)} FCFA</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-ink-muted">Taxes</span>
-                          <span className="text-ink">{order.pricing?.tax?.toLocaleString()} FCFA</span>
+                          <span className="text-ink">{formatAmount(order.pricing?.tax)} FCFA</span>
                         </div>
                         <div className="flex justify-between border-t border-divider pt-2 font-semibold">
                           <span className="text-ink">Total</span>
-                          <span className="text-brand">{order.pricing?.total?.toLocaleString()} FCFA</span>
+                          <span className="text-brand">{formatAmount(order.pricing?.total)} FCFA</span>
                         </div>
                       </div>
 
@@ -470,7 +471,7 @@ export default function OrderManager({ orders, onUpdate }: OrderManagerProps) {
                       {trans?.label}
                     </span>
                     <span className="ml-3 tabular-nums text-ink-muted">
-                      {order.pricing?.total?.toLocaleString()} FCFA
+                      {formatAmount(order.pricing?.total)} FCFA
                     </span>
                   </div>
                 </div>

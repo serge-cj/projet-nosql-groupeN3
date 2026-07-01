@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { IconMinus, IconPlus, IconTrash2 } from '../components/icons';
 import { groupCartByRestaurant, getCartTotal, getTotalItems, validateCartItems, type CartItem } from '@/lib/cartHelper';
+import { formatAmount } from '@/lib/format';
 
 const DISTRICTS = ['Nombakélé', 'Batavéa', 'Deïdate', 'Gué-Gué', 'Okala', 'Nkembo', 'Akébé', 'Lalala', 'PK5', 'Santa-Marija'];
 const PHONE_PREFIX = '+241';
@@ -204,7 +205,7 @@ export default function CartPage() {
                   <div key={group.restaurantId} className="space-y-4">
                     <div className="surface-card p-5">
                       <h3 className="font-semibold text-ink">Commande chez <span className="text-brand">{group.restaurantName}</span></h3>
-                      <p className="mt-1 text-sm text-ink-muted">{group.itemCount} article{group.itemCount !== 1 ? 's' : ''} · {group.subtotal.toLocaleString()} FCFA</p>
+                      <p className="mt-1 text-sm text-ink-muted">{group.itemCount} article{group.itemCount !== 1 ? 's' : ''} · {formatAmount(group.subtotal)} FCFA</p>
                     </div>
 
                     {group.items.map((item) => (
@@ -224,7 +225,7 @@ export default function CartPage() {
 
                           <div className="flex-1 min-w-0">
                             <h4 className="font-semibold text-ink">{item.dishName}</h4>
-                            <p className="mt-1 text-sm text-ink-muted">{item.unitPrice.toLocaleString()} FCFA</p>
+                            <p className="mt-1 text-sm text-ink-muted">{formatAmount(item.unitPrice)} FCFA</p>
 
                             <div className="mt-3 flex items-center gap-2">
                               <button
@@ -248,7 +249,7 @@ export default function CartPage() {
                           </div>
 
                           <div className="flex shrink-0 flex-col items-end justify-between">
-                            <p className="font-semibold tabular-nums text-ink">{(item.unitPrice * item.quantity).toLocaleString()} FCFA</p>
+                            <p className="font-semibold tabular-nums text-ink">{formatAmount(item.unitPrice * item.quantity)} FCFA</p>
                             <button
                               type="button"
                               onClick={() => removeItem(item.id)}
@@ -339,21 +340,21 @@ export default function CartPage() {
                   <div className="space-y-3 border-t border-divider pt-4 text-sm">
                     <div className="flex justify-between">
                       <span className="text-ink-muted">Sous-total</span>
-                      <span className="font-semibold tabular-nums text-ink">{subtotal.toLocaleString()} FCFA</span>
+                      <span className="font-semibold tabular-nums text-ink">{formatAmount(subtotal)} FCFA</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-ink-muted">Livraison estimée</span>
-                      <span className="font-semibold tabular-nums text-ink">{deliveryFee === 0 ? 'Gratuite' : `${deliveryFee.toLocaleString()} FCFA`}</span>
+                      <span className="font-semibold tabular-nums text-ink">{deliveryFee === 0 ? 'Gratuite' : `${formatAmount(deliveryFee)} FCFA`}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-ink-muted">Taxe estimée</span>
-                      <span className="font-semibold tabular-nums text-ink">{tax.toLocaleString()} FCFA</span>
+                      <span className="font-semibold tabular-nums text-ink">{formatAmount(tax)} FCFA</span>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between rounded-input bg-soft p-4">
                     <span className="font-semibold text-ink">Total estimé</span>
-                    <span className="text-xl font-bold tabular-nums text-brand">{total.toLocaleString()} FCFA</span>
+                    <span className="text-xl font-bold tabular-nums text-brand">{formatAmount(total)} FCFA</span>
                   </div>
 
                   {subtotal > 20000 && (

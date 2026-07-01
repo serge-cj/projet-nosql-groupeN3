@@ -64,8 +64,12 @@ async function initializeSocket(httpServer) {
   io.on('connection', (socket) => {
     logger.info('Client Socket.io connecté', { socketId: socket.id, userId: socket.userId });
 
-    // Nous faisons rejoindre la room de l'utilisateur
+    // Nous faisons rejoindre la room de l'utilisateur, ainsi que la room de son rôle
+    // (utile pour diffuser aux livreurs disponibles les nouvelles courses, par exemple).
     socket.join(`user:${socket.userId}`);
+    if (socket.userRole) {
+      socket.join(`role:${socket.userRole}`);
+    }
 
     // Nous traitons l'événement de rejointe d'une room de commande
     socket.on('join:order', (orderId) => {
@@ -153,6 +157,24 @@ function emitToUser(userId, event, data) {
 }
 
 /**
+ * Nous envoyons un événement à tous les utilisateurs d'un rôle donné (ex: tous les livreurs).
+ * @param {string} role - Rôle ciblé (ex: 'DELIVERER')
+ * @param {string} event - Nom de l'événement
+ * @param {Object} data - Données à envoyer
+ */
+function emitToRole(role, event, data) {
+  if (!io) {
+    if (process.env.NODE_ENV !== 'test') {
+      logger.warn('Socket.io non initialisé');
+    }
+    return;
+  }
+
+  io.to(`role:${role}`).emit(event, data);
+  logger.debug('Événement envoyé au rôle', { role, event });
+}
+
+/**
  * Nous récupérons l'instance Socket.io.
  * @returns {Object|null} - Instance Socket.io ou null
  */
@@ -164,5 +186,6 @@ module.exports = {
   initializeSocket,
   emitToRoom,
   emitToUser,
+  emitToRole,
   getIO,
 };

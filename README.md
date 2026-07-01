@@ -169,10 +169,3 @@ Voir `.env.example` :
 Projet réalisé dans le cadre du module **Bases de données NoSQL** — **Libreville Eats** (Groupe 3).
 
 # projet-nosql-groupeN3
-
-# Listes des livrables réalisés et non réalisé
-
-Pour vous facilité la corrections nous vous listons si dessous les livrables realisés et non realisés et nos ajoutes
-
-- Le rapport de conception au format PDF à été realisé et est disponible dans le dossier rapport;
-- le CRUD

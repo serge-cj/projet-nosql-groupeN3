@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { IconChevronRight } from './components/icons';
 import HomeLiveBadge from './components/HomeLiveBadge';
 import VendorHomeRedirect from './components/VendorHomeRedirect';
+import { formatAmount } from '@/lib/format';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -376,7 +377,7 @@ export default async function Home() {
                       {dish.district ? ` · ${dish.district}` : ''}
                     </p>
                     <p className="mt-auto font-mono text-base font-semibold text-mango-700">
-                      {dish.price.toLocaleString()} {dish.currency}
+                      {formatAmount(dish.price)} {dish.currency}
                     </p>
                   </div>
                 </Link>

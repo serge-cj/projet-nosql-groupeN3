@@ -120,6 +120,10 @@ export default function RestaurantDashboard() {
     socket.on('disconnect', () => setSocketStatus('disconnected'));
     socket.on('connect_error', () => setSocketStatus('error'));
 
+    socket.on('order:created', () => {
+      void loadData();
+    });
+
     socket.on('order:status:updated', () => {
       void loadData();
     });

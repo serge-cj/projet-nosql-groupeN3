@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import api from '@/lib/api';
+import { formatAmount } from '@/lib/format';
 
 interface Dish {
   _id?: string;
@@ -377,7 +378,7 @@ export default function MenuManager({ restaurantId, menus, onUpdate }: MenuManag
                               )}
                               <div className="mt-2 flex flex-wrap gap-2 text-xs">
                                 <span className="font-semibold text-brand tabular-nums">
-                                  {dish.price.toLocaleString()} FCFA
+                                  {formatAmount(dish.price)} FCFA
                                 </span>
                                 <span className="text-ink-muted">{dish.category}</span>
                                 <span className={`font-semibold ${dish.isAvailable ? 'text-forest-600' : 'text-error'}`}>

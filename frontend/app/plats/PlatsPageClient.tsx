@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import PageToolbar from '../components/PageToolbar';
 import { RestaurantCardSkeleton } from '../components/Skeleton';
 
@@ -45,6 +45,8 @@ interface DishesResponse {
 
 export default function PlatsPageClient() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -60,10 +62,22 @@ export default function PlatsPageClient() {
     if (initialized) return;
     const district = searchParams.get('district');
     const category = searchParams.get('category');
+    const page = Number(searchParams.get('page'));
     if (district) setSelectedDistrict(district);
     if (category) setSelectedCategory(category);
+    if (page > 1) setCurrentPage(page);
     setInitialized(true);
   }, [searchParams, initialized]);
+
+  useEffect(() => {
+    if (!initialized) return;
+    const params = new URLSearchParams();
+    if (selectedDistrict) params.set('district', selectedDistrict);
+    if (selectedCategory) params.set('category', selectedCategory);
+    if (currentPage > 1) params.set('page', String(currentPage));
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }, [initialized, selectedDistrict, selectedCategory, currentPage, pathname, router]);
 
   useEffect(() => {
     if (!initialized) return;
@@ -136,7 +150,7 @@ export default function PlatsPageClient() {
         description="Parcours les plats disponibles maintenant chez les restaurants de Libreville, filtre par quartier ou catégorie."
         meta={
           pagination ? (
-            <p className="rounded-pill bg-brand/10 px-4 py-2 text-sm font-semibold text-brand-ink">
+            <p className="rounded-pill bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-700">
               {pagination.total} plats disponibles
             </p>
           ) : null

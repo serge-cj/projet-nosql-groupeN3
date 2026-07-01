@@ -132,7 +132,7 @@ export default function Header() {
   );
 
   return (
-    <header className="sticky top-0 z-50 border-b border-divider bg-canvas/95 backdrop-blur-sm">
+    <header className="surface-glass sticky top-0 z-50 border-b border-divider">
       <nav className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 lg:gap-6 lg:px-10">
         <Link href={homeHref} className="shrink-0 font-display text-lg font-semibold text-brand sm:text-xl">
           <span className="hidden sm:inline">Libreville Eats</span>
@@ -225,7 +225,7 @@ export default function Header() {
                 {isOpen ? (
                   <div
                     role="menu"
-                    className="animate-dropdown-in absolute right-0 mt-2 w-48 rounded-card border border-divider bg-canvas shadow-card"
+                    className="surface-glass animate-dropdown-in absolute right-0 mt-2 w-48 rounded-card border border-divider shadow-card"
                   >
                     <Link
                       href="/orders"

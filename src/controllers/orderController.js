@@ -5,7 +5,7 @@ const { logger } = require('../utils/logger');
 const AppError = require('../utils/AppError');
 const { isValidTransition } = require('../utils/orderStateMachine');
 const cacheService = require('../services/cacheService');
-const { emitToRoom, emitToUser } = require('../socket');
+const { emitToRoom, emitToUser, emitToRole } = require('../socket');
 
 // Nous décrémentons le stock des plats commandés ($inc) et basculons isAvailable à false
 // via $set lorsque le stock atteint zéro (gestion des ruptures par plat).
@@ -123,6 +123,15 @@ async function createOrder(req, res, next) {
     // Nous invalidons le cache des commandes de l'utilisateur
     await cacheService.invalidate(`orders:user:${userId}*`);
     logger.debug('Cache invalidé pour createOrder', { userId });
+
+    // Nous notifions le restaurateur en temps réel de la nouvelle commande
+    if (restaurant.owner_id) {
+      emitToUser(restaurant.owner_id.toString(), 'order:created', {
+        orderId: order._id.toString(),
+        restaurantId: restaurantId.toString(),
+        timestamp: new Date(),
+      });
+    }
 
     res.status(201).json({ order });
   } catch (err) {
@@ -348,6 +357,12 @@ async function updateOrderStatus(req, res, next) {
     }
     logger.debug('Statut commande émis via Socket.io', { orderId: id, status });
 
+    // Nous diffusons à tous les livreurs disponibles qu'une nouvelle course est prête,
+    // sans attendre qu'ils rafraîchissent leur tableau de bord.
+    if (status === 'READY_FOR_DELIVERY' && !order.deliverer_id) {
+      emitToRole('DELIVERER', 'order:available:new', payload);
+    }
+
     res.json({ order });
   } catch (err) {
     logger.error('Erreur mise à jour statut commande', { message: err.message, stack: err.stack });
@@ -431,6 +446,9 @@ async function assignDeliverer(req, res, next) {
       emitToUser(restaurant.owner_id.toString(), 'order:deliverer:assigned', payload);
     }
     logger.debug('Assignation livreur émise via Socket.io', { orderId: id, delivererId });
+
+    // Nous informons les autres livreurs que cette course n'est plus disponible
+    emitToRole('DELIVERER', 'order:available:claimed', { orderId: id, timestamp: new Date() });
 
     if (isSelfAcceptingDeliverer && order.status === 'DELIVERY_IN_PROGRESS') {
       const statusPayload = {

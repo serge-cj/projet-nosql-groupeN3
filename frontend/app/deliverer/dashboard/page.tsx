@@ -5,6 +5,7 @@ import { io, type Socket } from 'socket.io-client';
 import { useRouter } from 'next/navigation';
 import PageToolbar from '../../components/PageToolbar';
 import api from '@/lib/api';
+import { formatAmount } from '@/lib/format';
 
 interface DeliveryOrder {
   _id: string;
@@ -103,6 +104,17 @@ export default function DelivererDashboard() {
     socket.on('order:deliverer:assigned', () => {
       void fetchDeliveries();
     });
+    socket.on('order:available:new', () => {
+      void fetchDeliveries();
+    });
+    socket.on('order:available:claimed', (data: { orderId: string }) => {
+      // Nous ne retirons que les courses encore affichées comme disponibles : si c'est
+      // ce livreur qui vient de l'accepter, sa mise à jour optimiste l'a déjà passée en
+      // DELIVERY_IN_PROGRESS et elle doit rester visible dans « en cours ».
+      setOrders((prev) =>
+        prev.filter((o) => !(o._id === data.orderId && o.status === 'READY_FOR_DELIVERY'))
+      );
+    });
 
     return () => {
       socket.disconnect();
@@ -163,7 +175,7 @@ export default function DelivererDashboard() {
           </div>
           <div className="shrink-0 text-right">
             <p className="text-lg font-semibold tabular-nums text-ink">
-              {order.pricing?.total?.toLocaleString()} {order.pricing?.currency || 'FCFA'}
+              {formatAmount(order.pricing?.total)} {order.pricing?.currency || 'FCFA'}
             </p>
             {action === 'accept' ? (
               <button

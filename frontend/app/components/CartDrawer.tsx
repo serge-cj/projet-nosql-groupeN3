@@ -3,6 +3,7 @@
 import { IconCart, IconChevronRight, IconMinus, IconPlus, IconTrash2 } from './icons';
 import type { CartItem } from '@/lib/cartHelper';
 import { getCartTotal, getTotalItems } from '@/lib/cartHelper';
+import { formatAmount } from '@/lib/format';
 
 interface CartDrawerProps {
   cartItems: CartItem[];
@@ -32,7 +33,7 @@ export default function CartDrawer({
         onClick={onClose}
       />
       <section
-        className={`pointer-events-auto fixed inset-x-0 bottom-0 mx-auto flex max-w-3xl flex-col rounded-t-3xl border border-divider bg-canvas shadow-2xl transition-transform duration-300 ${
+        className={`surface-glass pointer-events-auto fixed inset-x-0 bottom-0 mx-auto flex max-w-3xl flex-col rounded-t-3xl border border-divider shadow-2xl transition-transform duration-300 ${
           open ? 'translate-y-0' : 'translate-y-full'
         }`}
         aria-modal="true"
@@ -42,7 +43,7 @@ export default function CartDrawer({
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-ink-muted">Panier</p>
             <p className="mt-1 text-lg font-semibold text-ink">
-              {totalItems} article{totalItems !== 1 ? 's' : ''} · {totalPrice.toLocaleString()} FCFA
+              {totalItems} article{totalItems !== 1 ? 's' : ''} · {formatAmount(totalPrice)} FCFA
             </p>
           </div>
           <button
@@ -65,7 +66,7 @@ export default function CartDrawer({
                 <div className="min-w-0">
                   <p className="font-semibold text-ink">{item.dishName}</p>
                   <p className="mt-1 text-sm text-ink-muted">{item.restaurantName}</p>
-                  <p className="mt-3 text-sm tabular-nums text-ink">{(item.unitPrice * item.quantity).toLocaleString()} FCFA</p>
+                  <p className="mt-3 text-sm tabular-nums text-ink">{formatAmount(item.unitPrice * item.quantity)} FCFA</p>
                 </div>
 
                 <div className="flex flex-col items-end gap-3">
@@ -107,7 +108,7 @@ export default function CartDrawer({
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-sm text-ink-muted">Total estimé</p>
-              <p className="mt-1 text-xl font-semibold text-ink">{totalPrice.toLocaleString()} FCFA</p>
+              <p className="mt-1 text-xl font-semibold text-ink">{formatAmount(totalPrice)} FCFA</p>
             </div>
             <div className="flex gap-3">
               <button

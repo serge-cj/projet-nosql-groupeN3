@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { IconSearch } from '../components/icons';
 import { RestaurantCardSkeleton } from '../components/Skeleton';
 import StarRating from '../components/StarRating';
@@ -40,6 +40,8 @@ interface RestaurantsResponse {
 
 export default function RestaurantsPageClient() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,12 +56,23 @@ export default function RestaurantsPageClient() {
   useEffect(() => {
     if (initialized) return;
     const q = searchParams.get('q');
+    const page = Number(searchParams.get('page'));
     if (q) {
       setSearch(q);
       setDebouncedSearch(q);
     }
+    if (page > 1) setCurrentPage(page);
     setInitialized(true);
   }, [searchParams, initialized]);
+
+  useEffect(() => {
+    if (!initialized) return;
+    const params = new URLSearchParams();
+    if (debouncedSearch.trim()) params.set('q', debouncedSearch.trim());
+    if (currentPage > 1) params.set('page', String(currentPage));
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }, [initialized, debouncedSearch, currentPage, pathname, router]);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => setDebouncedSearch(search), 300);
